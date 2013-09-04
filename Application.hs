@@ -18,6 +18,9 @@ import Network.HTTP.Conduit (newManager, def)
 import Control.Monad.Logger (runLoggingT)
 import System.IO (stdout)
 import System.Log.FastLogger (mkLogger)
+import Data.Maybe
+import qualified Data.HashMap.Strict as HM
+import qualified Data.Text as T
 
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
@@ -60,7 +63,10 @@ makeFoundation conf = do
               Database.Persist.applyEnv
     p <- Database.Persist.createPoolConfig (dbconf :: Settings.PersistConf)
     logger <- mkLogger True stdout
-    let foundation = App conf s p manager dbconf logger
+    modroot <- withYamlEnvironment "config/settings.yml" (appEnv conf)
+               (\(Object o) -> let (String ar) = fromJust $ HM.lookup "root" o
+                               in return ar)
+    let foundation = App conf s p manager dbconf logger (T.unpack modroot)
 
     -- Perform database migration using our application's logging settings.
     runLoggingT

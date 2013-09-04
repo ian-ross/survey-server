@@ -4,7 +4,6 @@ import Prelude
 import Yesod
 import Yesod.Static
 import Yesod.Auth
-import Yesod.Auth.BrowserId
 import Yesod.Auth.GoogleEmail
 import Yesod.Default.Config
 import Yesod.Default.Util (addStaticContentExternal)
@@ -31,6 +30,7 @@ data App = App
     , httpManager :: Manager
     , persistConfig :: Settings.PersistConf
     , appLogger :: Logger
+    , moduleRoot :: FilePath
     }
 
 -- Set up i18n messages. See the message folder.
@@ -112,12 +112,31 @@ instance Yesod App where
     -- Place Javascript at bottom of the body tag so the rest of the page loads first
     jsLoader _ = BottomOfBody
 
+    isAuthorized route rd = checkAuthorization route rd
+
     -- What messages should be logged. The following includes all messages when
     -- in development, and warnings and errors in production.
     shouldLog _ _source level =
         development || level == LevelWarn || level == LevelError
 
     makeLogger = return . appLogger
+
+
+checkAuthorization :: Route App -> Bool -> Handler AuthResult
+checkAuthorization (StaticR _)           False = loggedIn True
+checkAuthorization (AuthR _)             _     = loggedIn True
+checkAuthorization FaviconR              False = loggedIn True
+checkAuthorization RobotsR               False = loggedIn True
+checkAuthorization HomeR                 False = loggedIn False
+checkAuthorization _ _ = return $ Unauthorized "Unknown route!"
+
+loggedIn :: Bool -> Handler AuthResult
+loggedIn goAhead = do
+  mu <- maybeAuthId
+  return $ case mu of
+    Nothing -> if goAhead then Authorized else AuthenticationRequired
+    Just _ -> Authorized
+
 
 -- How to run database actions.
 instance YesodPersist App where
@@ -142,7 +161,7 @@ instance YesodAuth App where
                 fmap Just $ insert $ User (credsIdent creds) Nothing
 
     -- You can add other plugins like BrowserID, email or OAuth here
-    authPlugins _ = [authBrowserId def, authGoogleEmail]
+    authPlugins _ = [authGoogleEmail]
 
     authHttpManager = httpManager
 
