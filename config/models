@@ -6,7 +6,7 @@ User
 
 Module
   title Text
-  source FilePath
+  content Text
   owner UserId
 
 ModuleActivation

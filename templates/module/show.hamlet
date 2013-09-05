@@ -1,0 +1,17 @@
+<header class="jumbotron subhead" id="overview">
+  <h2>Module: #{moduleTitle mdl}
+
+<section>
+  <div .row>
+    <div .span9>
+      <pre>
+        #{moduleContent mdl}
+    <div .span3>
+      <p>
+        <a href=@{ModuleEditR moduleId} .btn>Edit
+      <p>
+        <form action=@{ModuleDeleteR moduleId} method=POST>
+          <input type=submit value=Delete .btn .btn-danger>
+
+<a .btn href=@{HomeR}>
+  &laquo; Back to module list

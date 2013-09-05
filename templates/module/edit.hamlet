@@ -1,0 +1,10 @@
+<h2>Edit Module
+
+<div .row>
+  <div .span12>
+    <form method=POST action=@{ModuleEditR moduleId} enctype=#{enctype}>
+      ^{formWidget}
+      <input .btn type=submit value="Save">
+
+<a .btn href=@{HomeR}>
+  &laquo; Back to module list

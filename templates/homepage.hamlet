@@ -1,13 +1,22 @@
-<h3>Existing modules
+<h2>Existing modules
 
-<table>
+<table .table .table-hover>
   <thead>
     <th>Module ID
     <th>Title
     <th>Owner
   <tbody>
-    $forall (i, t, o) <- modules
+    $forall (m, o) <- modules
       <tr>
-        <td>#{i}
-        <td>#{t}
-        <td>#{o}
+        <td>
+          <a href=@{ModuleDetailR $ entityKey m}>
+            #{show $ entityToIntId $ entityKey $ m}
+        <td>
+          <a href=@{ModuleDetailR $ entityKey m}>
+            #{moduleTitle $ entityVal $ m}
+        <td>
+          <a href=@{ModuleDetailR $ entityKey m}>
+            #{o}
+
+<a .btn href=@{ModuleNewR}>
+  New module

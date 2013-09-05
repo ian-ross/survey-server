@@ -82,9 +82,13 @@ instance Yesod App where
 
         pc <- widgetToPageContent $ do
             $(combineStylesheets 'StaticR
-                [ css_normalize_css
-                , css_bootstrap_css
-                ])
+              [ css_normalize_css
+              , css_bootstrap_min_css
+              , css_app_css ])
+            $(combineScripts 'StaticR
+              [ js_jquery_min_js
+              , js_bootstrap_js ])
+            setTitle "Prototype Survey Server"
             $(widgetFile "default-layout")
         giveUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
@@ -128,6 +132,11 @@ checkAuthorization (AuthR _)             _     = loggedIn True
 checkAuthorization FaviconR              False = loggedIn True
 checkAuthorization RobotsR               False = loggedIn True
 checkAuthorization HomeR                 False = loggedIn False
+checkAuthorization ModuleNewR            _     = loggedIn False
+checkAuthorization (ModuleEditR _)       _     = loggedIn False
+checkAuthorization (ModuleDeleteR _)     True  = loggedIn False
+checkAuthorization (ModuleDetailR _)     False = loggedIn False
+
 checkAuthorization _ _ = return $ Unauthorized "Unknown route!"
 
 loggedIn :: Bool -> Handler AuthResult
