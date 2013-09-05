@@ -22,6 +22,11 @@ library
                      Handler.Home
                      Handler.CRUD
                      Utils
+                     Language.ModuleDSL
+                     Language.ModuleDSL.Syntax
+                     Language.ModuleDSL.Pretty
+                     Language.ModuleDSL.Parser
+                     Language.ModuleDSL.Render
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -64,6 +69,7 @@ library
                  , persistent                    >= 1.2        && < 1.3
                  , persistent-sqlite             >= 1.2        && < 1.3
                  , persistent-template           >= 1.2        && < 1.3
+                 , pretty                        >= 1.1.1.0    && < 1.2
                  , shakespeare-css               >= 1.0        && < 1.1
                  , shakespeare-js                >= 1.0.2      && < 1.2
                  , shakespeare-text              >= 1.0        && < 1.1
@@ -72,6 +78,7 @@ library
                  , time                          >= 1.4.0.1    && < 1.5
                  , transformers                  >= 0.3        && < 0.4
                  , unordered-containers          >= 0.2.3.1    && < 0.3
+                 , uu-parsinglib                 >= 2.8.1      && < 2.9
                  , wai-extra                     >= 1.3        && < 1.4
                  , warp                          >= 1.3        && < 1.4
                  , yaml                          >= 0.8        && < 0.9
