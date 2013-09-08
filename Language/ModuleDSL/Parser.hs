@@ -22,15 +22,18 @@ parseModule inp = if null errs then Right res else Left errs
 
 -- | Parse a name: starts with a lower case letter, then zero or more
 -- letters, digits, underscores or dashes.
-pName :: Parser Name
-pName = Name <$> ((:) <$> pLower <*> pList pIdChar)
+pNameRaw :: Parser Name
+pNameRaw = Name <$> ((:) <$> pLower <*> pList pIdChar)
   where pIdChar = pLower <|> pUpper <|> pDigit <|> pAnySym "_-"
+
+-- | Lexeme parser for names.
+pName :: Parser Name
+pName = lexeme pNameRaw
 
 -- | Parse a value.
 pValue :: Parser Value
 pValue = String <$> pQuotedString
-     <|> Integer <$> pNatural
-     <|> Double <$> pDouble
+     <|> head <$> amb (Double <$> pDouble <|> Integer <$> pInteger)
      <|> Bool <$> pBool
      <|> pReturn Null <* pToken "null"
   where pBool = pReturn True <* pToken "true"
@@ -46,7 +49,7 @@ pOptions = pBrackets (pList1Sep pComma pOption) `opt` []
 
 -- | Parse a single choice.
 pChoice :: Parser Choice
-pChoice = Choice <$> pQuotedString <* pToken "=>" <*> pValue
+pChoice = Choice <$> pQuotedString <* pSymbol "=>" <*> pValue
 
 -- | Parse a list of choices.
 pChoices :: Parser [Choice]
@@ -54,24 +57,24 @@ pChoices = pBraces (pList1Sep pComma pChoice)
 
 -- | Parse a single question.
 pQuestion :: Parser Question
-pQuestion = NumericQuestion <$ pToken "NumericQuestion" <*>
+pQuestion = NumericQuestion <$ pSymbol "NumericQuestion" <*>
             pQuotedString <*> pOptions
-        <|> ChoiceQuestion <$ pToken "ChoiceQuestion" <*>
+        <|> ChoiceQuestion <$ pSymbol "ChoiceQuestion" <*>
             pQuotedString <*> pOptions <*> pChoices
 
 -- | Parse a list of question definitions of the form "n = q".
 pQuestions :: Parser [(Name, Question)]
-pQuestions = pMany ((,) <$> pName <* pToken "=" <*> pQuestion)
+pQuestions = pMany ((,) <$> pName <* pSymbol "=" <*> pQuestion)
 
 -- | Parse a top-level definition: either a survey page or a
 -- parameterised specialisation of a question type.
 pTopLevel :: Parser TopLevel
-pTopLevel = Specialisation <$ pToken "Specialisation" <*>
+pTopLevel = Specialisation <$ pSymbol "Specialisation" <*>
             pName <*> (pParens (pListSep pComma pName) `opt` []) <*> pQuestion
-        <|> SurveyPage <$ pToken "SurveyPage" <*>
+        <|> SurveyPage <$ pSymbol "SurveyPage" <*>
             pName <*> pOptions <*> pQuestions
 
 -- | Parse a module.
 pModule :: Parser Module
-pModule = Module <$ pToken "Module" <*>
+pModule = Module <$ pSymbol "Module" <*>
           pName <*> pOptions <*> pMany pTopLevel
