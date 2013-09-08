@@ -41,17 +41,17 @@ instance Pretty [Choice] where
 instance Pretty Question where
   pretty (NumericQuestion t os) =
     text "NumericQuestion" <+> doubleQuotes (text t) $$
-    pretty os
+    nest 2 (pretty os)
   pretty (ChoiceQuestion t os cs) =
     text "ChoiceQuestion" <+> doubleQuotes (text t) $$
-    pretty os $$
-    pretty cs
+    nest 2 (pretty os $$
+            pretty cs)
 
 instance Pretty TopLevel where
   pretty (Specialisation nm ps body) =
     text "Specialisation" <+> pretty nm <>
-    parens (hsep $ punctuate comma $ map pretty ps) <+>
-    text "=" $$ pretty body
+    parens (hsep $ punctuate comma $ map pretty ps) <+> text "=" $$
+    nest 2 (pretty body)
   pretty (SurveyPage nm os qs) =
     text "SurveyPage" <+> pretty nm <+> pretty os $$
     (vcat $ map (\(n, q) -> pretty n <+> text "=" <+> pretty q) qs)
