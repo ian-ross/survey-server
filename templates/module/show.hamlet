@@ -1,8 +1,19 @@
-<header class="jumbotron subhead" id="overview">
-  <h2>Module: #{moduleTitle mdl}
+<br>
+<a .btn .btn-small href=@{HomeR}>
+  &laquo; Back to module list
 
-<section>
-  <div .row>
+<h2>Module: #{moduleTitle mdl}
+
+<ul .nav .nav-pills>
+  <li .active>
+    <a href="#definition" data-toggle="tab">
+      Definition
+  <li>
+    <a href="#parse" data-toggle="tab">
+      Parse results
+
+<div .tab-content>
+  <div #definition .row .tab-pane .active>
     <div .span9>
       <pre>
         #{moduleContent mdl}
@@ -13,5 +24,12 @@
         <form action=@{ModuleDeleteR moduleId} method=POST>
           <input type=submit value=Delete .btn .btn-danger>
 
-<a .btn href=@{HomeR}>
-  &laquo; Back to module list
+  <div #parse .row .tab-pane>
+    <div .span12>
+      <h4>Parse result
+      <pre>
+        #{show parseResult}
+
+      <h4>Pretty print
+      <pre>
+        #{ppResult}

@@ -18,5 +18,5 @@
           <a href=@{ModuleDetailR $ entityKey m}>
             #{o}
 
-<a .btn href=@{ModuleNewR}>
+<a .btn .btn-small href=@{ModuleNewR}>
   New module

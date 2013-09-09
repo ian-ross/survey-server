@@ -1,8 +1,11 @@
-<header class="jumbotron subhead" id="overview">
-  <h2>New Module
-<section>
-  <div .row>
-    <div .span12>
-      <form method=POST action=@{ModuleNewR} enctype=#{enctype}>
-        ^{formWidget}
-        <input type=submit>
+<br>
+<a .btn .btn-small href=@{HomeR}>
+  &laquo; Back to module list
+
+<h2>New Module
+
+<div .row>
+  <div .span12>
+    <form method=POST action=@{ModuleNewR} enctype=#{enctype}>
+      ^{formWidget}
+      <input type=submit>

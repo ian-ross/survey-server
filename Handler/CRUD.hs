@@ -11,6 +11,9 @@ module Handler.CRUD
 
 import Import
 import Utils
+import qualified Data.Text as T
+import qualified Language.ModuleDSL as ModDSL
+
 
 moduleForm :: Maybe Module -> Form (Text, Textarea)
 moduleForm mModule =
@@ -63,4 +66,6 @@ postModuleDeleteR moduleId = do
 getModuleDetailR :: ModuleId -> Handler Html
 getModuleDetailR moduleId = do
   mdl <- runDB $ get404 moduleId
+  let parseResult = ModDSL.parseModule $ T.unpack $ moduleContent mdl
+  let ppResult = either (const "") (ModDSL.prettyPrint) parseResult
   defaultLayout $(widgetFile "module/show")

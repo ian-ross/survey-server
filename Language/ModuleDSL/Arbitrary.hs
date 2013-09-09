@@ -42,6 +42,8 @@ instance Arbitrary Name where
           ch = frequency [(26, choose ('a', 'z')), (26, choose ('A', 'Z')),
                           (2, elements ['_', '-']), (10, choose ('0', '9'))]
 
+-- THIS IS A DEFICIENCY IN THE STRING PARSER: WE SHOULD SUPPORT SOME
+-- SORT OF ESCAPING FOR QUOTES AND OTHER SPECIAL CHARACTERS.
 okstring :: Gen String
 okstring = sized (\n -> replicateM n $ elements $
                         ['\32', '\33'] ++ ['\35'..'\127'])

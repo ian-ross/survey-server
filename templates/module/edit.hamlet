@@ -1,3 +1,7 @@
+<br>
+<a .btn .btn-small href=@{HomeR}>
+  &laquo; Back to module list
+
 <h2>Edit Module
 
 <div .row>
@@ -5,6 +9,3 @@
     <form method=POST action=@{ModuleEditR moduleId} enctype=#{enctype}>
       ^{formWidget}
       <input .btn type=submit value="Save">
-
-<a .btn href=@{HomeR}>
-  &laquo; Back to module list
