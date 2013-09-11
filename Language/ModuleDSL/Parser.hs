@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes #-}
 module Language.ModuleDSL.Parser
-       ( parseModule ) where
+       ( parseModule
+       , formatErrors ) where
 
 import Prelude
 import Data.Char
@@ -14,6 +15,23 @@ import Language.ModuleDSL.Syntax
 type Parser a = P (Str Char String LineColPos) a
 
 
+-- | Format errors for display.
+formatErrors :: [Error LineColPos] -> [String]
+formatErrors = map formatError
+  where formatError (Inserted s p e) =
+          formatPos p ++ formatExpects e ++ "(inserted " ++ s ++ ")"
+        formatError (Deleted s p e) =
+          formatPos p ++ formatExpects e ++ "(deleted " ++ s ++ ")"
+        formatError (Replaced s1 s2 p e) =
+          formatPos p ++ formatExpects e ++
+          "(replaced " ++ s1 ++ " with " ++ s2 ++ ")"
+        formatError (DeletedAtEnd s) = "Extra input at end of file: " ++ s
+        formatPos (LineColPos l c _) =
+          show (l+1) ++ ":" ++ show (c+1) ++ "  Parse error: "
+        formatExpects [] = "expecting nothing "
+        formatExpects [a] = "expecting " ++ a ++ " "
+        formatExpects (a:as) =
+          "expecting one of [" ++ a ++ concat (map (", " ++) as) ++ "] "
 
 -- | Parse a single module from a string, returning either the module
 -- definition or a list of errors.

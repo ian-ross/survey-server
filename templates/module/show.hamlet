@@ -28,7 +28,7 @@
     <div .span12>
       <h4>Parse result
       <pre>
-        #{show parseResult}
+        #{parseView}
 
       <h4>Pretty print
       <pre>

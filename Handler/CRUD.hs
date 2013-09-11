@@ -67,5 +67,6 @@ getModuleDetailR :: ModuleId -> Handler Html
 getModuleDetailR moduleId = do
   mdl <- runDB $ get404 moduleId
   let parseResult = ModDSL.parseModule $ T.unpack $ moduleContent mdl
+  let parseView = either (unlines . ModDSL.formatErrors) show parseResult
   let ppResult = either (const "") (ModDSL.prettyPrint) parseResult
   defaultLayout $(widgetFile "module/show")
