@@ -4,6 +4,8 @@ module Language.ModuleDSL.Pretty
        , prettyPrint ) where
 
 import Prelude
+import Data.Text (Text)
+import qualified Data.Text as T
 import Text.PrettyPrint
 
 import Language.ModuleDSL.Syntax
@@ -12,11 +14,14 @@ import Language.ModuleDSL.Syntax
 class Pretty a where
   pretty :: a -> Doc
 
-prettyPrint :: Pretty a => a -> String
-prettyPrint = render . pretty
+prettyPrint :: Pretty a => a -> Text
+prettyPrint = T.pack . render . pretty
+
+ttext :: Text -> Doc
+ttext = text . T.unpack
 
 instance Pretty Value where
-  pretty (String s) = doubleQuotes $ text s
+  pretty (String s) = doubleQuotes $ ttext s
   pretty (Integer i) = integer i
   pretty (Double d) = double d
   pretty (Bool True) = text "true"
@@ -24,7 +29,7 @@ instance Pretty Value where
   pretty Null = text "null"
 
 instance Pretty Name where
-  pretty (Name n) = text n
+  pretty (Name n) = ttext n
 
 instance Pretty Option where
   pretty (Option k v) = pretty k <> text " = " <> pretty v
@@ -33,17 +38,17 @@ instance Pretty [Option] where
   pretty os = brackets $ hsep $ punctuate comma $ map pretty os
 
 instance Pretty Choice where
-  pretty (Choice t v) = doubleQuotes (text t) <> text " => " <> pretty v
+  pretty (Choice t v) = doubleQuotes (ttext t) <> text " => " <> pretty v
 
 instance Pretty [Choice] where
   pretty cs = braces $ hsep $ punctuate comma $ map pretty cs
 
 instance Pretty Question where
   pretty (NumericQuestion t os) =
-    text "NumericQuestion" <+> doubleQuotes (text t) $$
+    text "NumericQuestion" <+> doubleQuotes (ttext t) $$
     nest 2 (pretty os)
   pretty (ChoiceQuestion t os cs) =
-    text "ChoiceQuestion" <+> doubleQuotes (text t) $$
+    text "ChoiceQuestion" <+> doubleQuotes (ttext t) $$
     nest 2 (pretty os $$
             pretty cs)
 

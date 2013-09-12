@@ -11,6 +11,9 @@
   <li>
     <a href="#parse" data-toggle="tab">
       Parse results
+  <li>
+    <a href="#render" data-toggle="tab">
+      Test render
 
 <div .tab-content>
   <div #definition .row .tab-pane .active>
@@ -33,3 +36,9 @@
       <h4>Pretty print
       <pre>
         #{ppResult}
+
+  <div #render .row .tab-pane>
+    <div .span12>
+      <h4>Test render
+      <div .test-render>
+        ^{renderView}

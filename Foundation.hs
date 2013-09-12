@@ -87,7 +87,9 @@ instance Yesod App where
               , css_app_css ])
             $(combineScripts 'StaticR
               [ js_jquery_min_js
-              , js_bootstrap_js ])
+              , js_bootstrap_js
+              , js_angular_min_js ])
+            addScript $ StaticR js_app_js
             setTitle "Prototype Survey Server"
             $(widgetFile "default-layout")
         giveUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")

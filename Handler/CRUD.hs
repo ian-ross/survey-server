@@ -11,7 +11,6 @@ module Handler.CRUD
 
 import Import
 import Utils
-import qualified Data.Text as T
 import qualified Language.ModuleDSL as ModDSL
 
 
@@ -66,7 +65,10 @@ postModuleDeleteR moduleId = do
 getModuleDetailR :: ModuleId -> Handler Html
 getModuleDetailR moduleId = do
   mdl <- runDB $ get404 moduleId
-  let parseResult = ModDSL.parseModule $ T.unpack $ moduleContent mdl
-  let parseView = either (unlines . ModDSL.formatErrors) show parseResult
-  let ppResult = either (const "") (ModDSL.prettyPrint) parseResult
+  let parseResult = ModDSL.parseModule $ moduleContent mdl
+      parseView = either (unlines . ModDSL.formatErrors) show parseResult
+      ppResult = either (const "") (ModDSL.prettyPrint) parseResult
+      renderView = either
+                   (const [whamlet|Parse failed: can't render!|])
+                   ModDSL.render parseResult
   defaultLayout $(widgetFile "module/show")

@@ -5,6 +5,8 @@ module Language.ModuleDSL.Parser
 
 import Prelude
 import Data.Char
+import Data.Text (Text)
+import qualified Data.Text as T
 import Text.ParserCombinators.UU
 import Text.ParserCombinators.UU.BasicInstances hiding (Parser)
 
@@ -35,15 +37,15 @@ formatErrors = map formatError
 
 -- | Parse a single module from a string, returning either the module
 -- definition or a list of errors.
-parseModule :: String -> Either [Error LineColPos] Module
+parseModule :: Text -> Either [Error LineColPos] Module
 parseModule inp = if null errs then Right res else Left errs
   where (res, errs) = parse ((,) <$ pSpaces <*> pModule <*> pEnd)
-                            (createStr (LineColPos 0 0 0) inp)
+                            (createStr (LineColPos 0 0 0) (T.unpack inp))
 
 -- | Parse a name: starts with a lower case letter, then zero or more
 -- letters, digits, underscores or dashes.
 pNameRaw :: Parser Name
-pNameRaw = Name <$> ((:) <$> pLower <*> pList pIdChar)
+pNameRaw = (Name . T.pack) <$> ((:) <$> pLower <*> pList pIdChar)
   where pIdChar = pLower <|> pUpper <|> pDigit <|> pAnySym "_-"
 
 -- | Lexeme parser for names.
@@ -52,7 +54,7 @@ pName = lexeme pNameRaw
 
 -- | Parse a value.
 pValue :: Parser Value
-pValue = String <$> pQuotedString
+pValue = (String . T.pack) <$> pQuotedString
      <|> head <$> amb (Double <$> pDouble <|> Integer <$> pInteger)
      <|> Bool <$> pBool
      <|> pReturn Null <* pSymbol "null"
@@ -69,7 +71,7 @@ pOptions = pBrackets (pListSep pComma pOption) `opt` []
 
 -- | Parse a single choice.
 pChoice :: Parser Choice
-pChoice = Choice <$> pQuotedString <* pSymbol "=>" <*> pValue
+pChoice = (Choice . T.pack) <$> pQuotedString <* pSymbol "=>" <*> pValue
 
 -- | Parse a list of choices.
 pChoices :: Parser [Choice]
@@ -77,9 +79,9 @@ pChoices = pBraces (pListSep pComma pChoice)
 
 -- | Parse a single question.
 pQuestion :: Parser Question
-pQuestion = NumericQuestion <$ pSymbol "NumericQuestion" <*>
+pQuestion = (NumericQuestion . T.pack) <$ pSymbol "NumericQuestion" <*>
             pQuotedString <*> pOptions
-        <|> ChoiceQuestion <$ pSymbol "ChoiceQuestion" <*>
+        <|> (ChoiceQuestion . T.pack) <$ pSymbol "ChoiceQuestion" <*>
             pQuotedString <*> pOptions <*> pChoices
 
 -- | Parse a list of question definitions of the form "n = q".

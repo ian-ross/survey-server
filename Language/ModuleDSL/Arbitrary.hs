@@ -2,6 +2,9 @@
 module Language.ModuleDSL.Arbitrary where
 
 import Prelude
+import Control.Applicative ((<$>))
+import Data.Text (Text)
+import qualified Data.Text as T
 import Test.QuickCheck
 import Control.Monad
 
@@ -37,16 +40,17 @@ instance Arbitrary Value where
 
 instance Arbitrary Name where
   arbitrary = liftM Name nameGenerator
-    where nameGenerator = liftM2 (:) inich $ sized (\n -> replicateM n ch)
+    where nameGenerator = liftM2 (\c cs -> T.pack (c:cs)) inich $
+                          sized (\n -> replicateM n ch)
           inich = frequency [(26, choose ('a', 'z'))]
           ch = frequency [(26, choose ('a', 'z')), (26, choose ('A', 'Z')),
                           (2, elements ['_', '-']), (10, choose ('0', '9'))]
 
 -- THIS IS A DEFICIENCY IN THE STRING PARSER: WE SHOULD SUPPORT SOME
 -- SORT OF ESCAPING FOR QUOTES AND OTHER SPECIAL CHARACTERS.
-okstring :: Gen String
-okstring = sized (\n -> replicateM n $ elements $
-                        ['\32', '\33'] ++ ['\35'..'\127'])
+okstring :: Gen Text
+okstring = T.pack <$> sized (\n -> replicateM n $ elements $
+                                   ['\32', '\33'] ++ ['\35'..'\127'])
 
 -- | Pretty-printer/parser round-trip testing property.
 checkModuleParser :: Module -> Bool
