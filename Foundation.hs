@@ -138,6 +138,7 @@ checkAuthorization ModuleNewR            _     = loggedIn False
 checkAuthorization (ModuleEditR _)       _     = loggedIn False
 checkAuthorization (ModuleDeleteR _)     True  = loggedIn False
 checkAuthorization (ModuleDetailR _)     False = loggedIn False
+checkAuthorization (ScheduleR _)         True  = loggedIn False
 
 checkAuthorization _ _ = return $ Unauthorized "Unknown route!"
 

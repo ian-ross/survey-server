@@ -10,3 +10,5 @@
 /module/#ModuleId/edit    ModuleEditR         GET POST
 /module/#ModuleId/delete  ModuleDeleteR       POST
 /module/#ModuleId         ModuleDetailR       GET
+
+/schedule/#ModuleId       ScheduleR           POST

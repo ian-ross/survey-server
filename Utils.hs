@@ -1,6 +1,10 @@
 module Utils where
 
 import Import
+import System.Random
+import Data.Char
+import qualified Data.Text as T
+
 
 data AlertType = Error | Warn | Info | OK
 
@@ -18,3 +22,11 @@ setAlert typ msg = do
     #{msg}
   |]
   setMessage htmlmsg
+
+generateHash :: IO Text
+generateHash = do
+  cs <- randomRs (0, 35) <$> getStdGen
+  return . T.pack . map xform . take 32 $ cs
+    where xform i
+            | i < 10 = chr $ i + ord '0'
+            | otherwise = chr $ (i - 10) + ord 'A'
