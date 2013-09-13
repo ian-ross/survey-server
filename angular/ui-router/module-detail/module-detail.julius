@@ -1,0 +1,10 @@
+var ModuleDetailCtrl =
+  ['$scope', '$state', '$compile', '$timeout',
+   function(sc, $state, $compile, $timeout)
+{
+  console.log("module-detail controller");
+  sc.$state = $state;
+  $state.go('definition');
+  #{rawJS scripts};
+  sc.render = $compile(#{toJSON rendered})(sc);
+}];

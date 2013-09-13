@@ -1,0 +1,8 @@
+<div .span12>
+  <h4>Parse result
+  <pre>
+    #{parseView}
+
+  <h4>Pretty print
+  <pre>
+    #{ppResult}

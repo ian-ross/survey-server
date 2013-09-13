@@ -11,6 +11,9 @@ module Handler.CRUD
 
 import Import
 import Utils
+import Angular.UIRouter
+import Text.Blaze.Html.Renderer.Text (renderHtml)
+import Text.Julius
 import qualified Language.ModuleDSL as ModDSL
 
 
@@ -68,7 +71,11 @@ getModuleDetailR moduleId = do
   let parseResult = ModDSL.parseModule $ moduleContent mdl
       parseView = either (unlines . ModDSL.formatErrors) show parseResult
       ppResult = either (const "") (ModDSL.prettyPrint) parseResult
-      renderView = either
-                   (const [whamlet|Parse failed: can't render!|])
-                   ModDSL.render parseResult
-  defaultLayout $(widgetFile "module/show")
+      (markup, rawscripts) = either
+                             (const ("Parse failed: can't render!", mempty))
+                             ModDSL.render parseResult
+      rendered = renderHtml markup
+  scripts <- renderJavascript <$> giveUrlRenderer rawscripts
+  runAngularUI $ do
+    injectLibraryModule "ui"
+    $(buildStateUI "module-detail")

@@ -1,0 +1,19 @@
+<div ng-controller="ModuleDetailCtrl">
+  <br>
+  <a .btn .btn-small href=@{HomeR}>
+    &laquo; Back to module list
+
+  <h2>Module: #{moduleTitle mdl}
+
+  <ul .nav .nav-pills>
+    <li ng-class="{ active: $state.includes('definition') }">
+      <a href="#" ui-sref="definition">
+        Definition
+    <li ng-class="{ active: $state.includes('parse-results') }">
+      <a href="#" ui-sref="parse-results">
+        Parse results
+    <li ng-class="{ active: $state.includes('test-render') }">
+      <a href="#" ui-sref="test-render">
+        Test render
+
+  <div class="row" ui-view>

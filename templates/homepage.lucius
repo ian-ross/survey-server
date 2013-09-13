@@ -1,3 +1,7 @@
+table tbody tr td form {
+    margin-bottom: 0px;
+}
+
 table tbody tr td a {
   display: block;
   width: 100%;

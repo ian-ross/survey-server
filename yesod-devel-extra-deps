@@ -1,0 +1,2 @@
+./Handler/CRUD.hs: ./angular/ui-router/module-detail
+./Handler/CRUD.hs: ./angular/shared/radian.julius

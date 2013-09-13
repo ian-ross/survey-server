@@ -62,70 +62,84 @@ type Form x = Html -> MForm (HandlerT App IO) (FormResult x, Widget)
 -- Please see the documentation for the Yesod typeclass. There are a number
 -- of settings which can be configured by overriding methods here.
 instance Yesod App where
-    approot = ApprootMaster $ appRoot . settings
+  approot = ApprootMaster $ appRoot . settings
 
-    -- Store session data on the client in encrypted cookies,
-    -- default session idle timeout is 120 minutes
-    makeSessionBackend _ = fmap Just $ defaultClientSessionBackend
-        (120 * 60) -- 120 minutes
-        "config/client_session_key.aes"
+  -- Store session data on the client in encrypted cookies, default
+  -- session idle timeout is 120 minutes
+  makeSessionBackend _ = fmap Just $ defaultClientSessionBackend
+                         (120 * 60) -- 120 minutes
+                         "config/client_session_key.aes"
 
-    defaultLayout widget = do
-        master <- getYesod
-        mmsg <- getMessage
+  defaultLayout widget = do
+    master <- getYesod
+    mmsg <- getMessage
 
-        -- We break up the default layout into two components:
-        -- default-layout is the contents of the body tag, and
-        -- default-layout-wrapper is the entire page. Since the final
-        -- value passed to hamletToRepHtml cannot be a widget, this allows
-        -- you to use normal widget features in default-layout.
+    -- We break up the default layout into two components:
+    -- default-layout is the contents of the body tag, and
+    -- default-layout-wrapper is the entire page. Since the final
+    -- value passed to hamletToRepHtml cannot be a widget, this allows
+    -- you to use normal widget features in default-layout.
 
-        pc <- widgetToPageContent $ do
-            $(combineStylesheets 'StaticR
-              [ css_normalize_css
-              , css_bootstrap_min_css
-              , css_app_css ])
-            $(combineScripts 'StaticR
-              [ js_jquery_min_js
-              , js_bootstrap_js
-              , js_angular_min_js ])
-            addScript $ StaticR js_app_js
-            setTitle "Prototype Survey Server"
-            $(widgetFile "default-layout")
-        giveUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
+    pc <- widgetToPageContent $ do
+      $(combineStylesheets 'StaticR
+        [ css_normalize_css
+        , css_bootstrap_min_css
+        , css_angular_ui_min_css
+        , css_radian_css
+        , css_app_css ])
+      $(combineScripts 'StaticR
+        [ js_jquery_min_js
+        , js_bootstrap_js
+        , js_d3_v2_js
+        , js_estraverse_js
+        , js_escodegen_browser_js
+        , js_mersenne_twister_js
+        , js_numeric_1_2_4_min_js
+        , js_sprintf_min_js
+        , js_angular_min_js
+        , js_angular_ui_min_js
+        , js_angular_ui_router_min_js ])
+      setTitle "Prototype Survey Server"
+      $(widgetFile "default-layout")
+    giveUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
-    -- This is done to provide an optimization for serving static files from
-    -- a separate domain. Please see the staticRoot setting in Settings.hs
-    urlRenderOverride y (StaticR s) =
-        Just $ uncurry (joinPath y (Settings.staticRoot $ settings y)) $ renderRoute s
-    urlRenderOverride _ _ = Nothing
+  -- This is done to provide an optimization for serving static files
+  -- from a separate domain. Please see the staticRoot setting in
+  -- Settings.hs
+  urlRenderOverride y (StaticR s) =
+    Just $ uncurry (joinPath y (Settings.staticRoot $ settings y)) $
+    renderRoute s
+  urlRenderOverride _ _ = Nothing
 
-    -- The page to be redirected to when authentication is required.
-    authRoute _ = Just $ AuthR LoginR
+  -- The page to be redirected to when authentication is required.
+  authRoute _ = Just $ AuthR LoginR
 
-    -- This function creates static content files in the static folder
-    -- and names them based on a hash of their content. This allows
-    -- expiration dates to be set far in the future without worry of
-    -- users receiving stale content.
-    addStaticContent =
-        addStaticContentExternal minifym genFileName Settings.staticDir (StaticR . flip StaticRoute [])
-      where
-        -- Generate a unique filename based on the content itself
-        genFileName lbs
-            | development = "autogen-" ++ base64md5 lbs
-            | otherwise   = base64md5 lbs
+  -- This function creates static content files in the static folder
+  -- and names them based on a hash of their content. This allows
+  -- expiration dates to be set far in the future without worry of
+  -- users receiving stale content.
+  addStaticContent =
+    addStaticContentExternal minifym
+    genFileName Settings.staticDir (StaticR . flip StaticRoute [])
+    where
+      -- Generate a unique filename based on the content itself
+      genFileName lbs
+        | development = "autogen-" ++ base64md5 lbs
+        | otherwise   = base64md5 lbs
 
-    -- Place Javascript at bottom of the body tag so the rest of the page loads first
-    jsLoader _ = BottomOfBody
+  -- Place Javascript at bottom of the body tag so the rest of the
+  -- page loads first
+  jsLoader _ = BottomOfBody
 
-    isAuthorized route rd = checkAuthorization route rd
+  isAuthorized route rd = checkAuthorization route rd
 
-    -- What messages should be logged. The following includes all messages when
-    -- in development, and warnings and errors in production.
-    shouldLog _ _source level =
-        development || level == LevelWarn || level == LevelError
+  -- What messages should be logged. The following includes all
+  -- messages when in development, and warnings and errors in
+  -- production.
+  shouldLog _ _source level =
+    development || level == LevelWarn || level == LevelError
 
-    makeLogger = return . appLogger
+  makeLogger = return . appLogger
 
 
 checkAuthorization :: Route App -> Bool -> Handler AuthResult
