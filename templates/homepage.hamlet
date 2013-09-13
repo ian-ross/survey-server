@@ -1,26 +1,5 @@
-<h2>Existing modules
+<h2>Home page
 
-<table .table .table-hover>
-  <thead>
-    <th>Module ID
-    <th>Title
-    <th>Owner
-    <th>
-  <tbody>
-    $forall (m, o) <- modules
-      <tr>
-        <td>
-          <a href=@{ModuleDetailR $ entityKey m}>
-            #{show $ entityToIntId $ entityKey $ m}
-        <td>
-          <a href=@{ModuleDetailR $ entityKey m}>
-            #{moduleTitle $ entityVal $ m}
-        <td>
-          <a href=@{ModuleDetailR $ entityKey m}>
-            #{o}
-        <td>
-          <form action=@{ScheduleR $ entityKey m} method=POST>
-            <input type=submit value="Schedule" .btn .btn-small>
-
-<a .btn .btn-small href=@{ModuleNewR}>
-  New module
+<br>
+<a .btn .btn-small href=@{ModulesR}>
+  Module list

@@ -1,3 +1,4 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 module Utils where
 
 import Import
@@ -30,3 +31,9 @@ generateHash = do
     where xform i
             | i < 10 = chr $ i + ord '0'
             | otherwise = chr $ (i - 10) + ord 'A'
+
+entityToIntId :: KeyBackend b e -> Int
+entityToIntId ent = do
+  case fromPersistValue . unKey $ ent of
+    Right (uid::Int) -> uid
+    Left _           -> (-1)

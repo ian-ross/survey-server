@@ -20,8 +20,9 @@ library
                      Settings.StaticFiles
                      Settings.Development
                      Angular.UIRouter
+                     Angular.BasicRouter
                      Handler.Home
-                     Handler.CRUD
+                     Handler.Modules
                      Handler.Schedule
                      Utils
                      Language.ModuleDSL

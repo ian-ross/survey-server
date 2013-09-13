@@ -19,28 +19,19 @@ module Angular.BasicRouter
 
 import Prelude
 import Import
-import Settings.StaticFiles
-import Control.Applicative ((<$>))
 import Control.Monad.Trans.Writer (WriterT, runWriterT, tell)
-import Data.Aeson (FromJSON, ToJSON)
 import Data.Map (Map)
 import qualified Data.Map as Map
-import Data.Maybe (fromMaybe)
-import Data.Monoid (First (..), Monoid (..))
-import Data.Text (Text)
-import Data.Text.Lazy (toStrict)
+import Data.Monoid (First (..))
 import Text.Hamlet
 import Text.Julius
 import Text.Cassius (cassiusFile)
 import Text.Lucius (luciusFile)
-import Yesod
-import Yesod.Json
 import Yesod.Static
 import Language.Haskell.TH.Syntax (Q, Exp (AppE, LitE), Lit (StringL), qRunIO)
 import qualified Data.Text as T
 import Data.Char (isAlpha)
 import System.Directory (doesFileExist)
-import Debug.Trace
 import Data.Maybe
 
 ngFile :: String -> Q Exp
@@ -51,7 +42,7 @@ urlAngularJs :: Route App
 --  Right "//ajax.googleapis.com/ajax/libs/angularjs/1.0.2/angular.min.js"
 urlAngularJs = StaticR $ StaticRoute ["js", "angular.min.js"] []
 
-wrapAngular :: Text -> Widget -> Handler RepHtml
+wrapAngular :: Text -> Widget -> Handler Html
 wrapAngular modname widget =
   defaultLayout [whamlet|<div ng-app=#{modname}>^{widget}|]
 
@@ -75,14 +66,13 @@ instance Monoid AngularWriter where
                         (mappend a7 b7)
 
 type Angular = WriterT AngularWriter Handler
-type Wrapper = Text -> Widget -> Handler RepHtml
+type Wrapper = Text -> Widget -> Handler Html
 
-runAngular :: Angular () -> Handler RepHtml
+runAngular :: Angular () -> Handler Html
 runAngular = runAngularWith wrapAngular
 
-runAngularWith :: Wrapper -> Angular () -> Handler RepHtml
+runAngularWith :: Wrapper -> Angular () -> Handler Html
 runAngularWith wrap ga = do
-    master <- getYesod
     ((), AngularWriter{..}) <- runWriterT ga
     modnametmp <- newIdent
     let (modname, mcss) =
@@ -99,12 +89,10 @@ runAngularWith wrap ga = do
 
     let defaultRoute =
             case awDefaultRoute of
-                First (Just x) -> [julius|.otherwise({redirectTo:"#{x}"})|]
+                First (Just x) -> [julius|.otherwise({redirectTo:#{toJSON x}})|]
                 First Nothing -> mempty
 
-    let injectModules = T.intercalate "," $
-                        map (\m -> "\"" `T.append` m `T.append` "\"") $
-                        Map.keys (Map.filter fst awModules)
+    let injectModules = Map.keys (Map.filter fst awModules)
 
     wrap modname $ do
         addScript urlAngularJs
@@ -117,7 +105,7 @@ runAngularWith wrap ga = do
           Just x -> toWidget x
         toWidget [julius|
 angular
-    .module("#{modname}", [#{injectModules}])
+    .module(#{toJSON modname}, #{toJSON injectModules})
     .config(["$routeProvider", function($routeProvider) {
         $routeProvider ^{awRoutes} ^{defaultRoute} ;
     }]);
@@ -129,24 +117,17 @@ addCommand :: (FromJSON input, ToJSON output)
 addCommand f = do
     name <- lift newIdent
     tell mempty { awCommands = Map.singleton name handler }
-    return $ "?command=" `mappend` name
-  where
-    handler = do
-        input <- parseJsonBody_
-        output <- f input
-        repjson <- jsonToRepJson output
-        sendResponse repjson
+    return $ "?command=" <> name
+  where handler = parseJsonBody_ >>= f >>= returnJson >>= sendResponse
+
 
 addFixCommand :: ToJSON output => Handler output -> Angular Text
 addFixCommand f = do
     name <- lift newIdent
     tell mempty { awCommands = Map.singleton name handler }
-    return $ "?command=" `mappend` name
-  where
-    handler = do
-        output <- f
-        repjson <- jsonToRepJson output
-        sendResponse repjson
+    return $ "?command=" <> name
+  where handler = f >>= returnJson >>= sendResponse
+
 
 addCtrl :: Text -- ^ module name
         -> Text -- ^ route pattern
@@ -173,9 +154,9 @@ addCtrlRaw name' route template controller = do
     tell mempty
         { awPartials = Map.singleton name template
         , awRoutes =
-          [julius|.when("#{rawJS route}",
-                        { controller:#{rawJS name},
-                          templateUrl:"?partial=#{name}"})|]
+          [julius|.when(#{toJSON route},
+                        { controller:#{toJSON name},
+                          templateUrl:"?partial=#{rawJS name}"})|]
         , awControllers = [julius|var #{rawJS name} = ^{controller};|]
         }
 

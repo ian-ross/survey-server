@@ -4,11 +4,12 @@
 /favicon.ico FaviconR GET
 /robots.txt RobotsR GET
 
-/                HomeR        GET
+/                         HomeR          GET
 
-/modules/new              ModuleNewR          GET POST
-/module/#ModuleId/edit    ModuleEditR         GET POST
-/module/#ModuleId/delete  ModuleDeleteR       POST
-/module/#ModuleId         ModuleDetailR       GET
+/modules                  ModulesR       GET
+/modules/new              ModuleNewR     GET POST
+/module/#ModuleId/edit    ModuleEditR    GET POST
+/module/#ModuleId/delete  ModuleDeleteR  POST
+/module/#ModuleId         ModuleDetailR  GET
 
-/schedule/#ModuleId       ScheduleR           POST
+/schedule/#ModuleId       ScheduleR      POST

@@ -148,6 +148,7 @@ checkAuthorization (AuthR _)             _     = loggedIn True
 checkAuthorization FaviconR              False = loggedIn True
 checkAuthorization RobotsR               False = loggedIn True
 checkAuthorization HomeR                 False = loggedIn False
+checkAuthorization ModulesR              False = loggedIn False
 checkAuthorization ModuleNewR            _     = loggedIn False
 checkAuthorization (ModuleEditR _)       _     = loggedIn False
 checkAuthorization (ModuleDeleteR _)     True  = loggedIn False

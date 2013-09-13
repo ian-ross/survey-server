@@ -24,7 +24,7 @@ import qualified Data.Text as T
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
 import Handler.Home
-import Handler.CRUD
+import Handler.Modules
 import Handler.Schedule
 
 -- This line actually creates our YesodDispatch instance. It is the second half

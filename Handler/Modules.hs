@@ -1,13 +1,11 @@
-{-# LANGUAGE OverloadedStrings, FlexibleInstances, ScopedTypeVariables #-}
-module Handler.CRUD
-  ( postModuleNewR
-  , getModuleNewR
-  , postModuleEditR
-  , getModuleEditR
-  , postModuleDeleteR
-  , getModuleDetailR
-  )
-  where
+{-# LANGUAGE FlexibleInstances, OverloadedStrings #-}
+module Handler.Modules
+       ( getModulesR
+       , getModuleNewR, postModuleNewR
+       , getModuleEditR, postModuleEditR
+       , postModuleDeleteR
+       , getModuleDetailR
+       ) where
 
 import Import
 import Utils
@@ -16,6 +14,13 @@ import Text.Blaze.Html.Renderer.Text (renderHtml)
 import Text.Julius
 import qualified Language.ModuleDSL as ModDSL
 
+getModulesR :: Handler Html
+getModulesR = do
+  ms <- runDB $ selectList [] [Asc ModuleId]
+  os <- runDB $ mapM get $ map (moduleOwner . entityVal) ms
+  let onames = map (maybe "Unknown" userEmail) os
+      modules = zip ms onames
+  defaultLayout $(widgetFile "module/list")
 
 moduleForm :: Maybe Module -> Form (Text, Textarea)
 moduleForm mModule =

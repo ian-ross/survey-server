@@ -1,6 +1,9 @@
 <br>
-<a .btn .btn-small href=@{HomeR}>
-  &laquo; Back to module list
+<div .btn-group>
+  <a .btn .btn-small href=@{HomeR}>
+    &laquo; Home
+  <a .btn .btn-small href=@{ModulesR}>
+    Module list
 
 <h2>New Module
 
