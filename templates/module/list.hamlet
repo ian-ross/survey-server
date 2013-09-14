@@ -1,7 +1,3 @@
-<br>
-<a .btn .btn-small href=@{HomeR}>
-  &laquo; Home
-
 <h2>Existing modules
 
 <table .table .table-hover>
@@ -14,13 +10,13 @@
     $forall (m, o) <- modules
       <tr>
         <td>
-          <a href=@{ModuleDetailR $ entityKey m}>
+          <a href=@{ModuleViewR $ entityKey m}>
             #{show $ entityToIntId $ entityKey $ m}
         <td>
-          <a href=@{ModuleDetailR $ entityKey m}>
+          <a href=@{ModuleViewR $ entityKey m}>
             #{moduleTitle $ entityVal $ m}
         <td>
-          <a href=@{ModuleDetailR $ entityKey m}>
+          <a href=@{ModuleViewR $ entityKey m}>
             #{o}
         <td>
           <form action=@{ScheduleR $ entityKey m} method=POST>

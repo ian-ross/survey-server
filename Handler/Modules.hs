@@ -4,10 +4,11 @@ module Handler.Modules
        , getModuleNewR, postModuleNewR
        , getModuleEditR, postModuleEditR
        , postModuleDeleteR
-       , getModuleDetailR
+       , getModuleViewR
        ) where
 
 import Import
+import Layouts
 import Utils
 import Angular.UIRouter
 import Text.Blaze.Html.Renderer.Text (renderHtml)
@@ -20,7 +21,7 @@ getModulesR = do
   os <- runDB $ mapM get $ map (moduleOwner . entityVal) ms
   let onames = map (maybe "Unknown" userEmail) os
       modules = zip ms onames
-  defaultLayout $(widgetFile "module/list")
+  appLayout $(widgetFile "module/list")
 
 moduleForm :: Maybe Module -> Form (Text, Textarea)
 moduleForm mModule =
@@ -36,7 +37,7 @@ postModuleNewR = do
     FormSuccess (t, c) -> do
       moduleId <- runDB $ insert $ Module t (unTextarea c) uid
       setAlert OK "Successfully added"
-      redirectUltDest $ ModuleDetailR moduleId
+      redirectUltDest $ ModuleViewR moduleId
     _ -> do
       setAlert Error "Form error"
       redirectUltDest ModuleNewR
@@ -44,7 +45,7 @@ postModuleNewR = do
 getModuleNewR :: Handler Html
 getModuleNewR = do
   (formWidget, enctype) <- generateFormPost $ moduleForm Nothing
-  defaultLayout $(widgetFile "module/new")
+  appLayout $(widgetFile "module/new")
 
 postModuleEditR :: ModuleId -> Handler Html
 postModuleEditR moduleId = do
@@ -55,13 +56,13 @@ postModuleEditR moduleId = do
       _ <- runDB $ replace moduleId $ Module t (unTextarea c) uid
       setAlert OK "Successfully replaced"
     _ -> setAlert Error "Form error"
-  redirectUltDest $ ModuleDetailR moduleId
+  redirectUltDest $ ModuleViewR moduleId
 
 getModuleEditR :: ModuleId -> Handler Html
 getModuleEditR moduleId = do
   mdl <- runDB $ get404 moduleId
   (formWidget, enctype) <- generateFormPost $ moduleForm (Just mdl)
-  defaultLayout $(widgetFile "module/edit")
+  appLayout $(widgetFile "module/edit")
 
 postModuleDeleteR :: ModuleId -> Handler Html
 postModuleDeleteR moduleId = do
@@ -70,8 +71,8 @@ postModuleDeleteR moduleId = do
   setAlert OK $ "Deleted Module: " <> moduleTitle mdl
   redirectUltDest HomeR
 
-getModuleDetailR :: ModuleId -> Handler Html
-getModuleDetailR moduleId = do
+getModuleViewR :: ModuleId -> Handler Html
+getModuleViewR moduleId = do
   mdl <- runDB $ get404 moduleId
   let parseResult = ModDSL.parseModule $ moduleContent mdl
       parseView = either (unlines . ModDSL.formatErrors) show parseResult
@@ -81,6 +82,6 @@ getModuleDetailR moduleId = do
                              ModDSL.render parseResult
       rendered = renderHtml markup
   scripts <- renderJavascript <$> giveUrlRenderer rawscripts
-  runAngularUI $ do
+  runAngularUIWithLayout appLayout $ do
     injectLibraryModule "ui"
-    $(buildStateUI "module-detail")
+    $(buildStateUI "module-view")

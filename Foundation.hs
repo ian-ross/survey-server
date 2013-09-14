@@ -1,12 +1,16 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 module Foundation where
 
 import Prelude
+import Control.Applicative ((<$>))
 import Yesod
 import Yesod.Static
 import Yesod.Auth
 import Yesod.Auth.GoogleEmail
 import Yesod.Default.Config
 import Yesod.Default.Util (addStaticContentExternal)
+import Data.Text (Text)
+import Data.Monoid
 import Network.HTTP.Conduit (Manager)
 import qualified Settings
 import Settings.Development (development)
@@ -18,6 +22,7 @@ import Model
 import Text.Jasmine (minifym)
 import Text.Hamlet (hamletFile)
 import System.Log.FastLogger (Logger)
+
 
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -70,9 +75,9 @@ instance Yesod App where
                          (120 * 60) -- 120 minutes
                          "config/client_session_key.aes"
 
+
   defaultLayout widget = do
     master <- getYesod
-    mmsg <- getMessage
 
     -- We break up the default layout into two components:
     -- default-layout is the contents of the body tag, and
@@ -98,7 +103,8 @@ instance Yesod App where
         , js_sprintf_min_js
         , js_angular_min_js
         , js_angular_ui_min_js
-        , js_angular_ui_router_min_js ])
+        , js_angular_ui_router_min_js
+        , js_ui_bootstrap_tpls_0_6_0_min_js ])
       setTitle "Prototype Survey Server"
       $(widgetFile "default-layout")
     giveUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
@@ -147,13 +153,20 @@ checkAuthorization (StaticR _)           False = loggedIn True
 checkAuthorization (AuthR _)             _     = loggedIn True
 checkAuthorization FaviconR              False = loggedIn True
 checkAuthorization RobotsR               False = loggedIn True
+
 checkAuthorization HomeR                 False = loggedIn False
+
 checkAuthorization ModulesR              False = loggedIn False
 checkAuthorization ModuleNewR            _     = loggedIn False
 checkAuthorization (ModuleEditR _)       _     = loggedIn False
 checkAuthorization (ModuleDeleteR _)     True  = loggedIn False
-checkAuthorization (ModuleDetailR _)     False = loggedIn False
+checkAuthorization (ModuleViewR _)       False = loggedIn False
+
 checkAuthorization (ScheduleR _)         True  = loggedIn False
+
+checkAuthorization UserAdminR            False = adminUser
+checkAuthorization (DeleteUserR _)       True  = adminUser
+checkAuthorization (ModifyUserR _ _)     True  = adminUser
 
 checkAuthorization _ _ = return $ Unauthorized "Unknown route!"
 
@@ -163,6 +176,14 @@ loggedIn goAhead = do
   return $ case mu of
     Nothing -> if goAhead then Authorized else AuthenticationRequired
     Just _ -> Authorized
+
+adminUser :: Handler AuthResult
+adminUser = do
+  uid <- requireAuthId
+  admin <- runDB $ maybe False userIsAdmin <$> get uid
+  return $ if admin
+           then Authorized
+           else Unauthorized "Must be administrator"
 
 
 -- How to run database actions.
@@ -185,12 +206,15 @@ instance YesodAuth App where
         case x of
             Just (Entity uid _) -> return $ Just uid
             Nothing -> do
-                fmap Just $ insert $ User (credsIdent creds) Nothing
+                fmap Just $ insert $ User (credsIdent creds) Nothing False
 
     -- You can add other plugins like BrowserID, email or OAuth here
     authPlugins _ = [authGoogleEmail]
 
     authHttpManager = httpManager
+
+    onLogin = setAlert OK "You are now logged in"
+
 
 -- This instance is required to use forms. You can modify renderMessage to
 -- achieve customized and internationalized form validation messages.
@@ -207,3 +231,22 @@ getExtra = fmap (appExtra . settings) getYesod
 -- wiki:
 --
 -- https://github.com/yesodweb/yesod/wiki/Sending-email
+
+
+data AlertType = Error | Warn | Info | OK
+
+setAlert :: AlertType -> Text -> Handler ()
+setAlert typ msg = do
+  let cls = ("alert" :: Text) <> case typ of
+        Error -> " alert-error"
+        Warn  -> ""
+        Info  -> " alert-info"
+        OK    -> " alert-success"
+  htmlmsg <- giveUrlRenderer [hamlet|
+  <div class="#{cls}">
+    <button type="button" .close data-dismiss="alert">
+      &times;
+    #{msg}
+  |]
+  setMessage htmlmsg
+

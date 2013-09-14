@@ -2,6 +2,8 @@
 module Handler.Home where
 
 import Import
+import Layouts
+
 
 getHomeR :: Handler Html
 getHomeR = do
@@ -9,10 +11,4 @@ getHomeR = do
   os <- runDB $ mapM get $ map (moduleOwner . entityVal) ms
   let onames = map (maybe "Unknown" userEmail) os
       modules = zip ms onames
-  defaultLayout $(widgetFile "homepage")
-
-entityToIntId :: KeyBackend b e -> Int
-entityToIntId ent = do
-  case fromPersistValue . unKey $ ent of
-    Right (uid::Int) -> uid
-    Left _           -> (-1)
+  appLayout $(widgetFile "homepage")

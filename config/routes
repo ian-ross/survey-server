@@ -7,9 +7,13 @@
 /                         HomeR          GET
 
 /modules                  ModulesR       GET
-/modules/new              ModuleNewR     GET POST
+/module/new               ModuleNewR     GET POST
 /module/#ModuleId/edit    ModuleEditR    GET POST
 /module/#ModuleId/delete  ModuleDeleteR  POST
-/module/#ModuleId         ModuleDetailR  GET
+/module/#ModuleId/view    ModuleViewR    GET
 
-/schedule/#ModuleId       ScheduleR      POST
+/schedule/#ModuleId    ScheduleR      POST
+
+/users                     UserAdminR     GET
+/user/#UserId/delete       DeleteUserR    POST
+/user/#UserId/modify/#Int  ModifyUserR    POST

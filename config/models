@@ -1,22 +1,23 @@
 User
-  email Text
-  password Text Maybe
+  email      Text
+  password   Text Maybe
+  isAdmin    Bool
   UniqueUser email
-  deriving Typeable
+  deriving Show Typeable
 
 Module
-  title Text
+  title   Text
   content Text
-  owner UserId
+  owner   UserId
 
 ModuleActivation
   module ModuleId
-  user UserId
-  date UTCTime
-  hash Text
+  user   UserId
+  date   UTCTime
+  hash   Text
 
 ModuleData
-  hash Text
-  module ModuleId
+  hash     Text
+  module   ModuleId
   question Text
-  value Text
+  value    Text

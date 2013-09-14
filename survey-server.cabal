@@ -15,16 +15,18 @@ library
     exposed-modules: Application
                      Foundation
                      Import
+                     Layouts
                      Model
                      Settings
                      Settings.StaticFiles
                      Settings.Development
+                     Utils
                      Angular.UIRouter
                      Angular.BasicRouter
+                     Handler.Admin
                      Handler.Home
                      Handler.Modules
                      Handler.Schedule
-                     Utils
                      Language.ModuleDSL
                      Language.ModuleDSL.Syntax
                      Language.ModuleDSL.Pretty

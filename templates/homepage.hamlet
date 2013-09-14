@@ -1,5 +1,2 @@
 <h2>Home page
 
-<br>
-<a .btn .btn-small href=@{ModulesR}>
-  Module list

@@ -1,11 +1,4 @@
-<div ng-controller="ModuleDetailCtrl">
-  <br>
-  <div .btn-group>
-    <a .btn .btn-small href=@{HomeR}>
-      &laquo; Home
-    <a .btn .btn-small href=@{ModulesR}>
-      Module list
-
+<div ng-controller="ModuleViewCtrl">
   <h2>Module: #{moduleTitle mdl}
 
   <ul .nav .nav-pills>

@@ -4,25 +4,9 @@ module Utils where
 import Import
 import System.Random
 import Data.Char
+import Control.Monad (when)
 import qualified Data.Text as T
 
-
-data AlertType = Error | Warn | Info | OK
-
-setAlert :: AlertType -> Text -> Handler ()
-setAlert typ msg = do
-  let cls = ("alert" :: Text) <> case typ of
-        Error -> " alert-error"
-        Warn  -> ""
-        Info  -> " alert-info"
-        OK    -> " alert-success"
-  htmlmsg <- giveUrlRenderer [hamlet|
-  <div class="#{cls}">
-    <button type="button" .close data-dismiss="alert">
-      &times;
-    #{msg}
-  |]
-  setMessage htmlmsg
 
 generateHash :: IO Text
 generateHash = do
@@ -37,3 +21,18 @@ entityToIntId ent = do
   case fromPersistValue . unKey $ ent of
     Right (uid::Int) -> uid
     Left _           -> (-1)
+
+isAdmin :: Handler Bool
+isAdmin = do
+  uid <- requireAuthId
+  runDB $ maybe False userIsAdmin <$> get uid
+
+requireAdmin :: Handler ()
+requireAdmin = do
+  admin <- isAdmin
+  when (not $ admin) $ invalidArgs ["Must be admin"]
+
+userAdminFlag :: User -> Text
+userAdminFlag u = if userIsAdmin u
+                  then "true"
+                  else "false"

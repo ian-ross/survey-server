@@ -1,0 +1,28 @@
+<div ng-controller="UserAdminCtrl">
+  <h2>Existing users
+
+  <alert ng-repeat="alert in alerts" type="alert.type"
+         close="closeAlert($index)">
+    {{alert.msg}}
+
+  <table .table .table-hover>
+    <thead>
+      <th>User ID
+      <th>Email
+      <th>Admin?
+      <th>
+    <tbody>
+      $forall (Entity uid u) <- users
+        <tr>
+          <td>
+            #{entityToIntId $ uid}
+          <td>
+            #{userEmail u}
+          <td>
+            <input type="checkbox"
+                   ng-model="admin[#{entityToIntId uid}]"
+                   ng-init="admin[#{entityToIntId uid}]=#{userAdminFlag u}"
+                   ng-change="setAdmin(#{entityToIntId uid})">
+          <td>
+            <form action=@{DeleteUserR uid} method=POST>
+              <input type=submit value="Delete" .btn .btn-small>

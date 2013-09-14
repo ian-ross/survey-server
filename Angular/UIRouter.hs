@@ -94,7 +94,7 @@
 --    from any other state.  [THIS ISN'T IMPLEMENTED YET.]
 --
 module Angular.UIRouter
-    ( runAngularUIWith, runAngularUI
+    ( runAngularUIWith, runAngularUIWithLayout, runAngularUI
     , addCommand, addFixCommand
     , buildStateUI
     , addRedirection, addDefaultRedirection
@@ -226,6 +226,15 @@ runAngularUI = runAngularUIWith defaultWrapper
           defaultLayout [whamlet|<div ng-app=#{modname}>^{widget}|]
 
 
+-- | Run Angular ui-router UI with default wrapper.
+--
+runAngularUIWithLayout :: (Widget -> Handler Html)
+                       -> AngularUI () -> Handler Html
+runAngularUIWithLayout layout = runAngularUIWith defaultWrapper
+  where defaultWrapper modname widget =
+          layout [whamlet|<div ng-app=#{modname}>^{widget}|]
+
+
 -- | Run Angular ui-router UI with user-supplied wrapper.
 --
 runAngularUIWith :: Wrapper -> AngularUI () -> Handler Html
@@ -307,7 +316,12 @@ buildStateUI tmodnm = do
 
   -- Extract states information from angular/ui-router/<module>
   -- directory hierarchy.
-  states <- qRunIO $ extractStates $ basedir </> "states"
+  states <- qRunIO $ do
+    let statedir = basedir </> "states"
+    ex <- doesDirectoryExist statedir
+    case ex of
+      False -> return []
+      True -> extractStates statedir
 
   -- Extract modals information from angular/ui-router/<module>
   -- directory hierarchy.
@@ -444,7 +458,10 @@ modalTable ms = unlines $ header : slines
 addStates :: Text     -- ^ module name
           -> [State]  -- ^ state definitions
           -> Q Exp
-addStates modnm ss = mapM (addState modnm) ss >>= (return . DoE . map NoBindS)
+addStates modnm ss =
+  if null ss
+  then [|do { return () }|]
+  else mapM (addState modnm) ss >>= (return . DoE . map NoBindS)
 
 
 -- | Set up single state definition.
