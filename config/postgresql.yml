@@ -1,0 +1,27 @@
+Default: &defaults
+  user: survey
+  password: survey
+  host: localhost
+  port: 5432
+  database: survey
+  poolsize: 10
+
+Development:
+  <<: *defaults
+
+Testing:
+  database: survey
+  <<: *defaults
+
+Staging:
+  database: survey
+  poolsize: 100
+  <<: *defaults
+
+Production:
+  database: surveyprod
+  user: surveyprod
+  password: ana8le7cts
+  host: 127.0.0.1
+  poolsize: 100
+  <<: *defaults

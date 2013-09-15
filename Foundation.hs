@@ -49,8 +49,10 @@ import Data.String
 -- access to the data present here.
 data App = App
     { settings :: AppConfig DefaultEnv Extra
-    , getStatic :: Static -- ^ Settings for static file serving.
-    , connPool :: Database.Persist.PersistConfigPool Settings.PersistConf -- ^ Database connection pool.
+    , getStatic :: Static
+      -- ^ Settings for static file serving.
+    , connPool :: Database.Persist.PersistConfigPool Settings.PersistConf
+      -- ^ Database connection pool.
     , httpManager :: Manager
     , persistConfig :: Settings.PersistConf
     , appLogger :: Logger
