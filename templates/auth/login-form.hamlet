@@ -1,0 +1,16 @@
+<p .signin-header>Log in
+<form .signin method="post" action=@{AuthR loginR}>
+  <fieldset>
+    <label>Email
+    <input #sign_in_email type="email" name="email" required autocomplete="on">
+    <label>Password
+    <input #sign_in_passwd type="password" name="password" required value="">
+    <div .form-inline>
+      <label .checkbox>
+        <input type="checkbox" name="remember_me">Remember me
+      <button #sign_in_submit type="submit" .btn .btn-small .pull-right>Sign in
+<a #sign_in_register_link .action href="/auth/page/email/register">
+  Register for an account
+<br>
+<a #sign_in_forgot_link .action href="/auth/page/email/reset-password">
+  Forgotten your password?

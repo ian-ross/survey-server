@@ -2,9 +2,9 @@ Default: &defaults
   host: "*4" # any IPv4 host
   port: 3000
   approot: "http://localhost:3000"
-  copyright: Insert copyright statement here
   root: "/home/iross/projects/survey-server/modules"
-  #analytics: UA-YOURCODE
+  aws_access: "AKIAJL2ZFXJGAVKR5GGQ"
+  aws_secret: "wJmSGDIrNUwTJ8lrQ8dUkBPHPgi8Ydazf2eMDHp4"
 
 Development:
   <<: *defaults

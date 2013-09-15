@@ -1,10 +1,10 @@
-/static StaticR Static getStatic
-/auth   AuthR   Auth   getAuth
+/static  StaticR  Static  getStatic
+/auth    AuthR    Auth    getAuth
 
-/favicon.ico FaviconR GET
-/robots.txt RobotsR GET
+/favicon.ico  FaviconR  GET
+/robots.txt   RobotsR   GET
 
-/                         HomeR          GET
+/  HomeR  GET
 
 /modules                  ModulesR       GET
 /module/new               ModuleNewR     GET POST
@@ -12,7 +12,7 @@
 /module/#ModuleId/delete  ModuleDeleteR  POST
 /module/#ModuleId/view    ModuleViewR    GET
 
-/schedule/#ModuleId    ScheduleR      POST
+/schedule/#ModuleId  ScheduleR  POST
 
 /users                     UserAdminR     GET
 /user/#UserId/delete       DeleteUserR    POST

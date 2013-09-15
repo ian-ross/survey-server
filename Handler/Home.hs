@@ -1,9 +1,10 @@
 {-# LANGUAGE TupleSections, ScopedTypeVariables, OverloadedStrings #-}
-module Handler.Home where
+module Handler.Home
+       ( getHomeR
+       ) where
 
 import Import
 import Layouts
-
 
 getHomeR :: Handler Html
 getHomeR = do

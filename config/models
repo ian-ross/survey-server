@@ -2,8 +2,14 @@ User
   email      Text
   password   Text Maybe
   isAdmin    Bool
+  resetkey   Text Maybe
   UniqueUser email
   deriving Show Typeable
+
+RMCookie
+  email Text
+  series Text
+  token Text
 
 Module
   title   Text

@@ -1,0 +1,5 @@
+Click on the link below to reset your openPsych password.
+
+\#{url}
+
+Thank you

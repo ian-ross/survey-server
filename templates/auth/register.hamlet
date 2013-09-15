@@ -1,0 +1,15 @@
+<div .row>
+  <div .span4 .offset4>
+    <div .well>
+      <p .register-header>Register for openPsych account
+      <form .register method="post" action=@{AuthR registerR}>
+        <fieldset>
+          <label>Email
+          <input type="email" name="email" required autocomplete="on">
+          <label>Password
+          <input #pwd1 type="password" name="password" required value="">
+          <label>Confirm password
+            <span #pwderr .text-error>&nbsp;&nbsp;(doesn't match)
+          <input #pwd2 type="password" name="passwordchk" required value="">
+          <button #register_in_submit type="submit" .btn .btn-primary .pull-right>Register
+

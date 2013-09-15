@@ -1,0 +1,4 @@
+<p>Click on the link below to reset your openPsych password.
+<p>
+  <a href=#{url}>#{url}
+<p>Thank you

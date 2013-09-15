@@ -1,0 +1,18 @@
+.pwd-invalid:focus:required {
+  color: #b94a48;
+  border-color: #ee5f5b;
+}
+
+.pwd-invalid:focus:required:focus {
+  border-color: #e9322d;
+  -webkit-box-shadow: 0 0 6px #f8b9b7;
+     -moz-box-shadow: 0 0 6px #f8b9b7;
+          box-shadow: 0 0 6px #f8b9b7;
+}
+
+#pwderr { display: none; }
+
+.register { margin: 0; }
+.register label { margin-bottom: 0; }
+.register input[type="email"], .register input[type="password"] { width: 95%; }
+p.register-header { font-weight: bold; }

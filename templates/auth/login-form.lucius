@@ -1,0 +1,12 @@
+ul.dropdown-form {
+  padding: 10px;
+  left: auto;
+  right: 0;
+}
+.signin-form a { display: inline-block; padding: 3px 10px; }
+.signin-form a.action { padding: 0; margin-top: 5px; color: #0088cc; }
+.signin-form hr { margin: 10px 0; }
+.signin { margin: 0; }
+.signin label { margin-bottom: 0; }
+.signin input[type="email"], .signin input[type="password"] { width: 95%; }
+p.signin-header { font-weight: bold; }

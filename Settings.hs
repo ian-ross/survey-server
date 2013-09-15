@@ -17,6 +17,7 @@ import Control.Applicative
 import Settings.Development
 import Data.Default (def)
 import Text.Hamlet
+import Data.ByteString
 
 -- | Which Persistent backend this site is using.
 type PersistConf = SqliteConf
@@ -66,11 +67,11 @@ widgetFile = (if development then widgetFileReload
               widgetFileSettings
 
 data Extra = Extra
-    { extraCopyright :: Text
-    , extraAnalytics :: Maybe Text -- ^ Google Analytics
+    { extraAwsAccess :: ByteString
+    , extraAwsSecret :: ByteString
     } deriving Show
 
 parseExtra :: DefaultEnv -> Object -> Parser Extra
 parseExtra _ o = Extra
-    <$> o .:  "copyright"
-    <*> o .:? "analytics"
+    <$> o .: "aws_access"
+    <*> o .: "aws_secret"
