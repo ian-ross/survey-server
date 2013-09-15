@@ -166,14 +166,14 @@ instance Yesod App where
   -- and names them based on a hash of their content. This allows
   -- expiration dates to be set far in the future without worry of
   -- users receiving stale content.
-  addStaticContent =
-    addStaticContentExternal minifym
+  addStaticContent = addStaticContentExternal mini
     genFileName Settings.staticDir (StaticR . flip StaticRoute [])
     where
       -- Generate a unique filename based on the content itself
       genFileName lbs
         | development = "autogen-" ++ base64md5 lbs
         | otherwise   = base64md5 lbs
+      mini = if development then (\bs -> Right bs) else minifym
 
   -- Place Javascript at bottom of the body tag so the rest of the
   -- page loads first
@@ -203,8 +203,10 @@ checkAuthorization ModuleNewR            _     = loggedIn False
 checkAuthorization (ModuleEditR _)       _     = loggedIn False
 checkAuthorization (ModuleDeleteR _)     True  = loggedIn False
 checkAuthorization (ModuleViewR _)       False = loggedIn False
+checkAuthorization (ModuleScheduleR _)   True  = loggedIn False
 
-checkAuthorization (ScheduleR _)         True  = loggedIn False
+checkAuthorization (SurveyRunR _)        False = loggedIn False
+checkAuthorization (SurveyResultsR _)    False = loggedIn False
 
 checkAuthorization UserAdminR            False = adminUser
 checkAuthorization (DeleteUserR _)       True  = adminUser

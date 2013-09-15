@@ -265,8 +265,7 @@ runAngularUIWith wrap ga = do
     Nothing -> return ()
     Just h -> getUrlRenderParams >>= sendResponse . toTypedContent . h
 
-  let extraModules = "ui.router" :
-                     if null awModalDefs then [] else ["ui.bootstrap"]
+  let extraModules = ["ui.router", "ui.bootstrap"]
       injectModules = extraModules ++ M.keys (M.filter fst awMods)
       modalDefs = mconcat $ intersperse [julius|,|] awModalDefs
 

@@ -1,24 +1,15 @@
 var UserAdminCtrl =
-  ['$scope', '$http',
-    function(sc, $http)
+  ['$scope', '$http', 'addAlert',
+    function(sc, $http, addAlert)
 {
-  sc.alerts = [ ];
-  sc.addAlert = function(m, t) {
-    var a = { msg: m };
-    if (t) a.type = t;
-    sc.alerts.push(a);
-  };
-  sc.closeAlert = function(index) { sc.alerts.splice(index, 1); };
-
   sc.admin = { };
   sc.setAdmin = function(uid) {
     $http.post('/user/' + uid + '/modify/' + (sc.admin[uid] ? 1 : 0)).
       success(function (data) {
-        sc.addAlert('Changed admin state for user ' + uid);
+        addAlert('Changed admin state for user ' + uid, 'success');
       }).
       error(function (data) {
-        sc.addAlert('Failed to change admin state for user ' + uid + '!',
-                    'error');
+        addAlert('Failed to change admin state for user ' + uid + '!', 'error');
       });
   };
 }];

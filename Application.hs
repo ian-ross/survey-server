@@ -25,7 +25,7 @@ import qualified Data.Text as T
 -- Don't forget to add new modules to your cabal file!
 import Handler.Home
 import Handler.Modules
-import Handler.Schedule
+import Handler.Survey
 import Handler.Admin
 
 -- This line actually creates our YesodDispatch instance. It is the second half

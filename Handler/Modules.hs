@@ -5,14 +5,16 @@ module Handler.Modules
        , getModuleEditR, postModuleEditR
        , postModuleDeleteR
        , getModuleViewR
+       , postModuleScheduleR
        ) where
 
 import Import
 import Layouts
 import Utils
-import Angular.UIRouter
+import Data.Time
 import Text.Blaze.Html.Renderer.Text (renderHtml)
 import Text.Julius
+import Angular.UIRouter
 import qualified Language.ModuleDSL as ModDSL
 
 getModulesR :: Handler Html
@@ -85,3 +87,12 @@ getModuleViewR moduleId = do
   runAngularUIWithLayout appLayout $ do
     injectLibraryModule "ui"
     $(buildStateUI "module-view")
+
+postModuleScheduleR :: ModuleId -> Handler Html
+postModuleScheduleR modid = do
+  uid <- requireAuthId
+  now <- liftIO $ getCurrentTime
+  hash <- liftIO $ generateHash
+  runDB $ insert_ $ ModuleActivation modid uid now hash False
+  setAlert OK "Successfully scheduled"
+  redirectUltDest $ HomeR

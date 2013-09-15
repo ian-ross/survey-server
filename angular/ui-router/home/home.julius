@@ -1,0 +1,6 @@
+var HomeCtrl =
+  ['$scope', '$http',
+    function(sc, $http)
+{
+
+}];

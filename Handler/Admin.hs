@@ -13,7 +13,7 @@ getUserAdminR :: Handler Html
 getUserAdminR = do
   users <- runDB $ selectList [] [Asc UserId]
   runAngularUIWithLayout appLayout $ do
-    injectLibraryModule "ui.bootstrap"
+    $(addSharedModule "alerts" True)
     $(buildStateUI "user-admin")
 
 postDeleteUserR :: UserId -> Handler Html

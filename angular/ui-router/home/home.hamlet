@@ -1,0 +1,48 @@
+<div ng-controller="HomeCtrl">
+  <h2>Home page
+
+  <alert-list>
+
+  <h4>Outstanding surveys
+
+  $if null outstanding
+    <p>
+      You have no outstanding surveys.
+  $else
+    <table .table .table-hover>
+      <thead>
+        <th>Module ID
+        <th>Module name
+        <th>Timestamp
+        <th>
+      <tbody>
+        $forall (mid, mnm, mts, hash) <- outstanding
+          <tr>
+            <td>#{mid}
+            <td>#{mnm}
+            <td>#{mts}
+            <td>
+              <a href=@{SurveyRunR hash} .btn .btn-small>
+                Run
+
+  <h4>Completed surveys
+
+  $if null completed
+    <p>
+      You have no completed surveys.
+  $else
+    <table .table .table-hover>
+      <thead>
+        <th>Module ID
+        <th>Module name
+        <th>Timestamp
+        <th>
+      <tbody>
+        $forall (mid, mnm, mts, hash) <- completed
+          <tr>
+            <td>#{mid}
+            <td>#{mnm}
+            <td>#{mts}
+            <td>
+              <a href=@{SurveyResultsR hash} .btn .btn-small>
+                Results

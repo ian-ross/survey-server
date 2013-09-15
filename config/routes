@@ -6,14 +6,16 @@
 
 /  HomeR  GET
 
-/modules                  ModulesR       GET
-/module/new               ModuleNewR     GET POST
-/module/#ModuleId/edit    ModuleEditR    GET POST
-/module/#ModuleId/delete  ModuleDeleteR  POST
-/module/#ModuleId/view    ModuleViewR    GET
-
-/schedule/#ModuleId  ScheduleR  POST
+/modules                    ModulesR         GET
+/module/new                 ModuleNewR       GET POST
+/module/#ModuleId/edit      ModuleEditR      GET POST
+/module/#ModuleId/delete    ModuleDeleteR    POST
+/module/#ModuleId/view      ModuleViewR      GET
+/module/#ModuleId/schedule  ModuleScheduleR  POST
 
 /users                     UserAdminR     GET
 /user/#UserId/delete       DeleteUserR    POST
 /user/#UserId/modify/#Int  ModifyUserR    POST
+
+/survey/#Text/run      SurveyRunR      GET
+/survey/#Text/results  SurveyResultsR  GET

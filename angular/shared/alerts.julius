@@ -1,0 +1,27 @@
+angular.module('alerts', []).
+value('currentAlerts', []).
+factory('addAlert', ['currentAlerts', function(currentAlerts)
+{
+  return function(m, t) {
+    var a = { msg: m };
+    if (t) a.type = t;
+    currentAlerts.push(a);
+  };
+}]).
+directive('alertList',
+ ['currentAlerts', function(currentAlerts)
+{
+  return {
+    restrict: 'E',
+    template: ['<alert ng-repeat="alert in alerts" type="alert.type" ',
+                      'close="closeAlert($index)">',
+                 '{{alert.msg}}',
+               '</alert>'].join(''),
+    replace: true,
+    scope: true,
+    link: function(scope, elm, as) {
+      scope.alerts = currentAlerts;
+      scope.closeAlert = function(index) { scope.alerts.splice(index, 1); };
+    }
+  };
+}]);

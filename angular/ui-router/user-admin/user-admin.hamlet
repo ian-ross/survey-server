@@ -1,9 +1,7 @@
 <div ng-controller="UserAdminCtrl">
   <h2>Existing users
 
-  <alert ng-repeat="alert in alerts" type="alert.type"
-         close="closeAlert($index)">
-    {{alert.msg}}
+  <alert-list>
 
   <table .table .table-hover>
     <thead>
