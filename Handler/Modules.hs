@@ -11,9 +11,12 @@ module Handler.Modules
 import Import
 import Layouts
 import Utils
+import Control.Monad (forM)
 import Data.Time
+import qualified Data.Text as T
 import Text.Blaze.Html.Renderer.Text (renderHtml)
 import Text.Julius
+import System.Locale
 import Angular.UIRouter
 import qualified Language.ModuleDSL as ModDSL
 
@@ -73,6 +76,19 @@ postModuleDeleteR moduleId = do
   setAlert OK $ "Deleted Module: " <> moduleTitle mdl
   redirectUltDest HomeR
 
+data SurveyQ = SurveyQ { sqQ :: Text, sqA :: Text }
+
+instance ToJSON SurveyQ where
+  toJSON (SurveyQ q a) = object [ "question" .= q, "answer" .= a ]
+
+data SurveyAct = SurveyAct { saUser :: Text,
+                             saDate :: Text,
+                             saQs :: [SurveyQ] }
+
+instance ToJSON SurveyAct where
+  toJSON (SurveyAct u d qs) =
+    object [ "user" .= u, "date" .= d, "questions" .= qs ]
+
 getModuleViewR :: ModuleId -> Handler Html
 getModuleViewR moduleId = do
   mdl <- runDB $ get404 moduleId
@@ -83,9 +99,18 @@ getModuleViewR moduleId = do
                              (const ("Parse failed: can't render!", mempty))
                              ModDSL.render parseResult
       rendered = renderHtml markup
+  acts <- runDB $ selectList [ModuleActivationModule ==. moduleId,
+                              ModuleActivationCompleted ==. True]
+                             [Asc ModuleActivationDate]
+  results <- forM acts $ \(Entity _ (ModuleActivation _ u d hash _)) -> do
+    user <- runDB $ get u
+    let username = maybe "Unknown" userEmail user
+        ts = T.pack $ formatTime defaultTimeLocale "%c" d
+    dat <- runDB $ selectList [ModuleDataHash ==. hash] []
+    let qas = map (\(Entity _ (ModuleData _ _ q a)) -> SurveyQ q a) dat
+    return $ SurveyAct username ts qas
   scripts <- renderJavascript <$> giveUrlRenderer rawscripts
   runAngularUIWithLayout appLayout $ do
-    injectLibraryModule "ui"
     $(buildStateUI "module-view")
 
 postModuleScheduleR :: ModuleId -> Handler Html
@@ -95,4 +120,4 @@ postModuleScheduleR modid = do
   hash <- liftIO $ generateHash
   runDB $ insert_ $ ModuleActivation modid uid now hash False
   setAlert OK "Successfully scheduled"
-  redirectUltDest $ HomeR
+  redirect $ HomeR

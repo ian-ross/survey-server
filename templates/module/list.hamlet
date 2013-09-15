@@ -1,6 +1,6 @@
 <h2>Existing modules
 
-<table .table .table-hover>
+<table .list .table .table-hover>
   <thead>
     <th>Module ID
     <th>Title
@@ -9,13 +9,13 @@
   <tbody>
     $forall (m, o) <- modules
       <tr>
-        <td>
+        <td .full>
           <a href=@{ModuleViewR $ entityKey m}>
             #{show $ entityToIntId $ entityKey $ m}
-        <td>
+        <td .full>
           <a href=@{ModuleViewR $ entityKey m}>
             #{moduleTitle $ entityVal $ m}
-        <td>
+        <td .full>
           <a href=@{ModuleViewR $ entityKey m}>
             #{o}
         <td>

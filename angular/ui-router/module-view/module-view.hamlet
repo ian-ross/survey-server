@@ -11,5 +11,8 @@
     <li ng-class="{ active: $state.includes('test-render') }">
       <a href="#" ui-sref="test-render">
         Test render
+    <li ng-class="{ active: $state.includes('module-results') }">
+      <a href="#" ui-sref="module-results">
+        Module results
 
   <div class="row" ui-view>

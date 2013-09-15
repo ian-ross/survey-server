@@ -9,7 +9,7 @@
     <p>
       You have no outstanding surveys.
   $else
-    <table .table .table-hover>
+    <table .list .table .table-hover>
       <thead>
         <th>Module ID
         <th>Module name
@@ -31,11 +31,12 @@
     <p>
       You have no completed surveys.
   $else
-    <table .table .table-hover>
+    <table .list .table .table-hover>
       <thead>
         <th>Module ID
         <th>Module name
         <th>Timestamp
+        <th>
         <th>
       <tbody>
         $forall (mid, mnm, mts, hash) <- completed
@@ -46,3 +47,6 @@
             <td>
               <a href=@{SurveyResultsR hash} .btn .btn-small>
                 Results
+            <td>
+              <form action=@{SurveyDeleteR hash} method=POST>
+                <input type=submit value="Delete" .btn .btn-small>

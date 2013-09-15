@@ -1,4 +1,4 @@
 <div .span12>
   <h4>Test render
-  <div .test-render>
+  <div .survey-render>
     <div ng-bind-html-unsafe="render">

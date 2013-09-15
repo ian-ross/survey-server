@@ -3,7 +3,7 @@
 
   <alert-list>
 
-  <table .table .table-hover>
+  <table .list .table .table-hover>
     <thead>
       <th>User ID
       <th>Email

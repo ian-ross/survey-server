@@ -2,8 +2,14 @@ var ModuleViewCtrl =
   ['$scope', '$state', '$compile', '$timeout',
    function(sc, $state, $compile, $timeout)
 {
+  sc.results = { };
+  sc.postprocess = { };
+  sc.results = #{toJSON results};
+  sc.resultIdx = 0;
+  sc.setIdx = function(i) { sc.resultIdx = i; };
   sc.$state = $state;
   $state.go('definition');
   #{rawJS scripts};
   sc.render = $compile(#{toJSON rendered})(sc);
+  console.log("results = " + JSON.stringify(sc.results));
 }];

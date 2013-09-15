@@ -1,0 +1,29 @@
+var RunSurveyCtrl =
+  ['$scope', '$state', '$compile', '$http', '$window', 'addAlert',
+   function(sc, $state, $compile, $http, $window, addAlert)
+{
+  sc.results = { };
+  sc.postprocess = { };
+  #{rawJS scripts};
+  sc.render = $compile(#{toJSON rendered})(sc);
+  sc.submitResults = function() {
+    console.log("Submitting results...");
+    var send = { };
+    for (k in sc.results)
+      send[k] = !isNaN(Number(sc.results[k])) ?
+        Number(sc.results[k]) : sc.results[k];
+    $http.post('@{SurveyRunR hash}', send).
+      success(function (data) {
+        if (data.Right) {
+          console.log("Success: " + JSON.stringify(data));
+          $window.location.href = '/';
+        } else
+          addAlert(data.Left, 'error');
+      }).
+      error(function (data) {
+        addAlert('Failed to submit results!', 'error');
+        console.log("Error: " + JSON.stringify(data));
+      });
+    console.log(sc);
+  };
+}];

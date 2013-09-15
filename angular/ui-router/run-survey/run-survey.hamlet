@@ -1,0 +1,6 @@
+<div ng-controller="RunSurveyCtrl">
+  <div .survey-render>
+    <div ng-bind-html-unsafe="render">
+
+  <button .btn ng-click="submitResults()">
+    Submit results

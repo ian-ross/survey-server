@@ -17,5 +17,6 @@
 /user/#UserId/delete       DeleteUserR    POST
 /user/#UserId/modify/#Int  ModifyUserR    POST
 
-/survey/#Text/run      SurveyRunR      GET
+/survey/#Text/run      SurveyRunR      GET POST
 /survey/#Text/results  SurveyResultsR  GET
+/survey/#Text/delete   SurveyDeleteR   POST

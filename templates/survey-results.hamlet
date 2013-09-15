@@ -1,0 +1,15 @@
+<h4>Module: #{modName}
+
+<p>#{ts}
+
+<table .list .table .table-hover>
+  <thead>
+    <th>Question name
+    <th>Value
+  <tbody>
+    $forall (q, v) <- res
+      <tr>
+        <td>
+          #{q}
+        <td>
+          #{v}

@@ -15,6 +15,7 @@ Module
   title   Text
   content Text
   owner   UserId
+  deriving Show
 
 ModuleActivation
   module    ModuleId

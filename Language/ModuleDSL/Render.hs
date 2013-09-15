@@ -17,18 +17,15 @@ class Render a where
 instance ToMarkup Name where
   toMarkup (Name n) = toMarkup n
 
-instance ToValue Name where
-  toValue (Name n) = toValue n
-
 instance ToJavascript Name where
   toJavascript (Name n) = toJavascript $ rawJS n
 
-instance ToValue Value where
-  toValue (String s) = toValue s
-  toValue (Integer i) = toValue i
-  toValue (Double d) = toValue d
-  toValue (Bool b) = toValue b
-  toValue Null = toValue ("null" :: String)
+instance ToMarkup Value where
+  toMarkup (String s) = toMarkup s
+  toMarkup (Integer i) = toMarkup i
+  toMarkup (Double d) = toMarkup d
+  toMarkup (Bool b) = toMarkup b
+  toMarkup Null = toMarkup ("null" :: String)
 
 
 instance Render Module where
@@ -47,32 +44,38 @@ instance Render TopLevel where
     (toMarkup ("Specialisation..." :: String), mempty)
 
 instance Render (Name, Question) where
-  render (n, NumericQuestion t os) =
+  render (name, NumericQuestion t os) =
     let Integer mn = lookupOpt "min" os (Integer 0)
         Integer mx = lookupOpt "max" os (Integer 100)
         initVal = (mn + mx) `div` 2
-        sname = "slider_" <> n
     in ([shamlet|
          <div .question>
            <div .question-text>
              #{t}
            <div>
              <input type="range" min=#{mn} max=#{mx}
-                    ng-model="#{sname}" ng-init="#{sname}=#{initVal}">
+                         ng-model="results['#{name}']">
              <span>
-               {{#{sname}}}
+               {{results['#{name}']}}
         |],
-        [julius|console.log("Numeric question: #{n}");|])
-  render (n, (ChoiceQuestion qt _os cs)) =
+        [julius|
+console.log("Numeric question: #{name}");
+sc.results['#{name}'] = #{toJSON initVal};
+|])
+  render (name, (ChoiceQuestion qt _os cs)) =
     ([shamlet|
       <div .question>
         <div .question-text>
           <span>
             #{qt}
-          $forall Choice ct _v <- cs
+          $forall Choice ct v <- cs
             <label .radio>
               <span>
                 #{ct}
-              <input type="radio" name=#{"radio_" <> n}>
+              <input type="radio" ng-model="results['#{name}']"
+                     value=#{toMarkup v} name=#{"radio_" <> name}>
      |],
-     [julius|console.log("Choice question: #{n}");|])
+     [julius|
+console.log("Choice question: #{name}");
+sc.results['#{name}'] = null;
+|])

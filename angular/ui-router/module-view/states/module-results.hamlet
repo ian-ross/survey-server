@@ -1,0 +1,23 @@
+<div .span12>
+  <h4>Module results
+
+  <div .span3>
+    <table .list .table .table-hover>
+      <tbody>
+        <tr ng-repeat="r in results" ng-class="{info:resultIdx==$index}">
+          <td ng-click="setIdx($index)">
+            {{r.user}}
+            <br>
+            {{r.date}}
+
+  <div .span8>
+    <table .list .table .table-hover>
+      <thead>
+        <th>Question
+        <th>Answer
+      <tbody>
+        <tr ng-repeat="qa in results[resultIdx].questions">
+          <td>
+            {{qa.question}}
+          <td>
+            {{qa.answer}}

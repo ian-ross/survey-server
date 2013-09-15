@@ -205,8 +205,9 @@ checkAuthorization (ModuleDeleteR _)     True  = loggedIn False
 checkAuthorization (ModuleViewR _)       False = loggedIn False
 checkAuthorization (ModuleScheduleR _)   True  = loggedIn False
 
-checkAuthorization (SurveyRunR _)        False = loggedIn False
+checkAuthorization (SurveyRunR _)        _     = loggedIn False
 checkAuthorization (SurveyResultsR _)    False = loggedIn False
+checkAuthorization (SurveyDeleteR _)     True  = loggedIn False
 
 checkAuthorization UserAdminR            False = adminUser
 checkAuthorization (DeleteUserR _)       True  = adminUser
