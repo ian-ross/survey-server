@@ -1,0 +1,10 @@
+[Unit]
+Description=Prototype survey server
+Requires=postgresql.service
+
+[Service]
+Type=simple
+ExecStart=/opt/survey-server/bin/survey-server Production
+
+[Install]
+WantedBy=multi-user.target

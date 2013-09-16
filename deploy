@@ -1,0 +1,22 @@
+#!/bin/bash
+
+source .hsenv*/bin/activate
+
+git pull
+
+yesod keter
+
+PROJ=survey-server
+DDIR=/opt/$PROJ-deploy
+sudo mkdir $DDIR
+sudo mv $PROJ.keter $DDIR
+cd $DDIR
+
+sudo tar xzf $PROJ.keter
+
+cd /opt
+sudo /bin/rm -fr $PROJ-old
+sudo mv $PROJ $PROJ-old
+sudo mv $PROJ-deploy $PROJ
+
+sudo systemctl restart survey-server

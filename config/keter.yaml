@@ -1,7 +1,7 @@
-exec: ../dist/build/survey-server/survey-server
+exec: ../bin/survey-server
 args:
     - production
-host: <<HOST-NOT-SET>>
+host: survey.skybluetrades.net
 
 # Use the following to automatically copy your bundle upon creation via `yesod
 # keter`. Uses `scp` internally, so you can set it to a remote destination

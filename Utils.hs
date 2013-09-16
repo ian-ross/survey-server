@@ -11,9 +11,7 @@ import qualified Data.Text as T
 generateHash :: IO Text
 generateHash = do
   cs <- evalRandIO (getRandomRs (0, 35))
-  let ret = T.pack . map xform . take 32 $ cs
-  putStrLn $ "\n\n\ngenerateHash => " ++ T.unpack ret ++ "\n\n\n"
-  return ret
+  return . T.pack . map xform . take 32 $ cs
     where xform i
             | i < 10 = chr $ i + ord '0'
             | otherwise = chr $ (i - 10) + ord 'A'
