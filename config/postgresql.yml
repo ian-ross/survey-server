@@ -19,9 +19,9 @@ Staging:
   <<: *defaults
 
 Production:
-  database: surveyprod
-  user: surveyprod
-  password: ana8le7cts
-  host: 127.0.0.1
+  database: survey
+  user: survey
+  password: survey
+  host: localhost
   poolsize: 100
   <<: *defaults
