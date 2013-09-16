@@ -15,6 +15,7 @@ cd $DDIR
 sudo tar xzf $PROJ.keter
 
 cd /opt
+sudo chown -R survey.users $PROJ-deploy
 sudo /bin/rm -fr $PROJ-old
 sudo mv $PROJ $PROJ-old
 sudo mv $PROJ-deploy $PROJ

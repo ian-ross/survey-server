@@ -5,6 +5,8 @@ Requires=postgresql.service
 [Service]
 Type=simple
 ExecStart=/opt/survey-server/bin/survey-server Production
+User=survey
+Group=users
 
 [Install]
 WantedBy=multi-user.target
