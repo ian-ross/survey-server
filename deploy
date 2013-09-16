@@ -20,4 +20,5 @@ sudo /bin/rm -fr $PROJ-old
 sudo mv $PROJ $PROJ-old
 sudo mv $PROJ-deploy $PROJ
 
+sudo systemctl --system daemon-reload
 sudo systemctl restart survey-server
