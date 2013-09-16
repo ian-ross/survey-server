@@ -7,6 +7,7 @@ Type=simple
 ExecStart=/opt/survey-server/bin/survey-server Production
 User=survey
 Group=users
+WorkingDirectory=/opt/survey-server
 
 [Install]
 WantedBy=multi-user.target
