@@ -22,6 +22,7 @@ literalsGroup :: TestTree
 literalsGroup = testGroup "Literals"
  [ testProperty "Numeric literals" num_literals
  , testProperty "Boolean literals" bool_literals
+ , testProperty "String literals"  string_literals
  ]
 
 num_literals :: Literal -> Property
@@ -34,6 +35,11 @@ bool_literals :: Literal -> Property
 bool_literals x = isBool x ==> roundTrip pLiteral x
   where isBool (Bool _) = True
         isBool _        = False
+
+string_literals :: Literal -> Property
+string_literals x = isString x ==> roundTrip pLiteral x
+  where isString (String _) = True
+        isString _          = False
 
 idsGroup :: TestTree
 idsGroup = testGroup "Identifiers"

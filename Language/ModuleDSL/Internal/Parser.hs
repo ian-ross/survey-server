@@ -34,7 +34,7 @@ pName = lexeme pNameRaw
 
 -- | Parse a value.
 pLiteral :: Parser Literal
-pLiteral = (String . T.pack) <$> pQuotedString
+pLiteral = (String . T.pack) <$> pStringLiteral
      <|> head <$> amb ((\v -> Double . maybe v (const $ v / 100.0)) <$>
                        pDouble <*> pMaybe (pSym '%') <|>
                        Integer <$> pInteger)
@@ -42,6 +42,14 @@ pLiteral = (String . T.pack) <$> pQuotedString
      <|> pReturn Null <* pSymbol "null"
   where pBool = pReturn True  <* (pSymbol "true"  <|> pSymbol "yes")
             <|> pReturn False <* (pSymbol "false" <|> pSymbol "no")
+
+-- | String literals: delimited by double quotes, these can contain
+-- any Unicode printing character.  The only character escaping is the
+-- use of '""' to represent embedded double quotes.
+pStringLiteral :: Parser String
+pStringLiteral = lexeme $ pSym '"' *> pList ch <* pSym '"'
+  where ch = head <$> pToken "\"\"" <|> pSatisfy (\c -> isPrint c && c /= '"')
+             (Insertion  "Character in a string" 'y' 5)
 
 -- | Parse a single option setting.
 pOption :: Parser Option

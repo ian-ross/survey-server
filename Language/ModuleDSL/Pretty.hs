@@ -9,6 +9,7 @@ import qualified Data.Text as T
 import Text.PrettyPrint
 
 import Language.ModuleDSL.Syntax
+import Language.ModuleDSL.Internal.Utils
 
 
 class Pretty a where
@@ -21,7 +22,7 @@ ttext :: Text -> Doc
 ttext = text . T.unpack
 
 instance Pretty Literal where
-  pretty (String s) = doubleQuotes $ ttext s
+  pretty (String s) = doubleQuotes . ttext . T.pack . dupquotes . T.unpack $ s
   pretty (Integer i) = integer i
   pretty (Double d) = double d
   pretty (Bool True) = text "true"

@@ -5,11 +5,13 @@ module Language.ModuleDSL.Arbitrary where
 import Prelude
 import Control.Applicative ((<$>), (<*>))
 import Control.Monad
+import Data.Char
 import Data.Text (Text)
 import qualified Data.Text as T
 import Test.QuickCheck
 
 import Language.ModuleDSL.Syntax
+import Language.ModuleDSL.Internal.Utils
 
 
 -- Arbitrary instances for all AST types.
@@ -47,10 +49,13 @@ instance Arbitrary Name where
                       return $ T.intercalate "." $ map T.pack comps)
           inich = frequency [(26, choose ('a', 'z')), (26, choose ('A', 'Z'))]
           ch = frequency [(26, choose ('a', 'z')), (26, choose ('A', 'Z')),
-                          (3, elements ['_', '-']), (10, choose ('0', '9'))]
+                          (2, elements ['_', '-']), (10, choose ('0', '9'))]
 
 -- THIS IS A DEFICIENCY IN THE STRING PARSER: WE SHOULD SUPPORT SOME
 -- SORT OF ESCAPING FOR QUOTES AND OTHER SPECIAL CHARACTERS.
 okstring :: Gen Text
-okstring = T.pack <$> sized (\n -> replicateM n $ elements $
-                                   ['\32', '\33'] ++ ['\35'..'\127'])
+okstring = (T.pack . dupquotes) <$> sized (\n -> replicateM n okch)
+  where okch = frequency [(10, elements [' ', '"']), (10, choose ('0', '9')),
+                          (26, choose ('a', 'z')), (26, choose ('A', 'Z')),
+                          (10, choose (' ', '\127') `suchThat` isPrint),
+                          (5, choose (' ', '\1024') `suchThat` isPrint)]
