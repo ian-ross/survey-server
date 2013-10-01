@@ -4,7 +4,7 @@ module Language.ModuleDSL.Render
        ( render
        ) where
 
-import Import hiding (Module, Value, Null, String, Bool)
+import Import hiding (Module, Null, String, Bool)
 import Import (String)
 import Text.Blaze
 import Text.Julius
@@ -20,7 +20,7 @@ instance ToMarkup Name where
 instance ToJavascript Name where
   toJavascript (Name n) = toJavascript $ rawJS n
 
-instance ToMarkup Value where
+instance ToMarkup Literal where
   toMarkup (String s) = toMarkup s
   toMarkup (Integer i) = toMarkup i
   toMarkup (Double d) = toMarkup d

@@ -3,14 +3,13 @@ module Language.ModuleDSL.Arbitrary where
 
 import Prelude
 import Control.Applicative ((<$>))
+import Control.Monad
 import Data.Text (Text)
 import qualified Data.Text as T
 import Test.QuickCheck
-import Control.Monad
 
 import Language.ModuleDSL.Syntax
-import Language.ModuleDSL.Pretty
-import Language.ModuleDSL.Parser
+
 
 -- Arbitrary instances for all AST types.
 
@@ -31,7 +30,7 @@ instance Arbitrary Choice where
 instance Arbitrary Option where
   arbitrary = liftM2 Option arbitrary arbitrary
 
-instance Arbitrary Value where
+instance Arbitrary Literal where
   arbitrary = oneof [ liftM String okstring
                     , liftM Integer arbitrary
                     , liftM Double arbitrary
@@ -51,13 +50,3 @@ instance Arbitrary Name where
 okstring :: Gen Text
 okstring = T.pack <$> sized (\n -> replicateM n $ elements $
                                    ['\32', '\33'] ++ ['\35'..'\127'])
-
--- | Pretty-printer/parser round-trip testing property.
-checkModuleParser :: Module -> Bool
-checkModuleParser ast =
-  case parseModule (prettyPrint ast) of
-    Left _ -> False
-    Right a -> ast == a
-
-runChecks :: IO ()
-runChecks = quickCheck checkModuleParser

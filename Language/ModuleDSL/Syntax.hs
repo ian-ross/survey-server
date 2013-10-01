@@ -11,12 +11,12 @@ import Data.List (find)
 import Text.Julius
 
 
-data Value = String !Text
-           | Integer !Integer
-           | Double !Double
-           | Bool !Bool
-           | Null
-           deriving (Eq, Ord, Show, Data, Typeable)
+data Literal = String !Text
+             | Integer !Integer
+             | Double !Double
+             | Bool !Bool
+             | Null
+             deriving (Eq, Ord, Show, Data, Typeable)
 
 data Name = Name Text
           deriving (Eq, Ord, Show, Data, Typeable)
@@ -32,15 +32,15 @@ instance RawJS Name where
   rawJS (Name n) = rawJS n
 
 data Option = Option { optKey :: Name
-                     , optValue :: Value }
+                     , optValue :: Literal }
             deriving (Eq, Ord, Show, Data, Typeable)
 
-lookupOpt :: Text -> [Option] -> Value -> Value
+lookupOpt :: Text -> [Option] -> Literal -> Literal
 lookupOpt k os def = maybe def optValue $ find ((== (Name k)) . optKey) os
 
 
 data Choice = Choice { chText :: Text
-                     , chValue :: Value }
+                     , chValue :: Literal }
             deriving (Eq, Ord, Show, Data, Typeable)
 
 data Question = NumericQuestion { nqText :: Text

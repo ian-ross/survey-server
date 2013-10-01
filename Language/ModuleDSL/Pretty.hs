@@ -20,7 +20,7 @@ prettyPrint = T.pack . render . pretty
 ttext :: Text -> Doc
 ttext = text . T.unpack
 
-instance Pretty Value where
+instance Pretty Literal where
   pretty (String s) = doubleQuotes $ ttext s
   pretty (Integer i) = integer i
   pretty (Double d) = double d

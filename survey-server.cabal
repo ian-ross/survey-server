@@ -31,6 +31,7 @@ library
                      Language.ModuleDSL.Syntax
                      Language.ModuleDSL.Pretty
                      Language.ModuleDSL.Parser
+                     Language.ModuleDSL.Internal.Parser
                      Language.ModuleDSL.Render
                      Language.ModuleDSL.Arbitrary
 
@@ -141,6 +142,6 @@ Test-Suite dsl-tests
     build-depends: survey-server,
                    base                        >= 4.3      && < 5,
                    containers                  >= 0.4      && < 0.6,
-                   tasty                       >= 0.3,
-                   tasty-quickcheck            >= 0.3,
-                   QuickCheck                  >= 2.6      && < 2.7
+                   QuickCheck                  >= 2.6      && < 2.7,
+                   text                        >= 0.11     && < 0.12,
+                   uu-parsinglib               >= 2.8.1    && < 2.9
