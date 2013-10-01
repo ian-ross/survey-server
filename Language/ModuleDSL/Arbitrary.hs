@@ -1,8 +1,9 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Language.ModuleDSL.Arbitrary where
 
 import Prelude
-import Control.Applicative ((<$>))
+import Control.Applicative ((<$>), (<*>))
 import Control.Monad
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -39,11 +40,14 @@ instance Arbitrary Literal where
 
 instance Arbitrary Name where
   arbitrary = liftM Name nameGenerator
-    where nameGenerator = liftM2 (\c cs -> T.pack (c:cs)) inich $
-                          sized (\n -> replicateM n ch)
-          inich = frequency [(26, choose ('a', 'z'))]
+    where nameGenerator =
+            sized (\ncomp -> do
+                      comps <- replicateM (ncomp + 1)
+                               ((:) <$> inich <*> sized (flip replicateM ch))
+                      return $ T.intercalate "." $ map T.pack comps)
+          inich = frequency [(26, choose ('a', 'z')), (26, choose ('A', 'Z'))]
           ch = frequency [(26, choose ('a', 'z')), (26, choose ('A', 'Z')),
-                          (2, elements ['_', '-']), (10, choose ('0', '9'))]
+                          (3, elements ['_', '-']), (10, choose ('0', '9'))]
 
 -- THIS IS A DEFICIENCY IN THE STRING PARSER: WE SHOULD SUPPORT SOME
 -- SORT OF ESCAPING FOR QUOTES AND OTHER SPECIAL CHARACTERS.

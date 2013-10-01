@@ -1,8 +1,9 @@
-{-# LANGUAGE FlexibleContexts, RankNTypes #-}
+{-# LANGUAGE FlexibleContexts, RankNTypes, OverloadedStrings #-}
 module Language.ModuleDSL.Internal.Parser where
 
 import Prelude
 import Data.Char
+import Data.Text (Text)
 import qualified Data.Text as T
 import Text.ParserCombinators.UU
 import Text.ParserCombinators.UU.BasicInstances hiding (Parser)
@@ -14,11 +15,18 @@ import Language.ModuleDSL.Syntax
 type Parser a = P (Str Char String LineColPos) a
 
 
--- | Parse a name: starts with a lower case letter, then zero or more
+-- | Parse a name component: starts with a letter, then zero or more
 -- letters, digits, underscores or dashes.
+pNameComponent :: Parser Text
+pNameComponent = T.pack <$> ((:) <$> pIdIniChar <*> pList pIdChar)
+  where pIdIniChar = pLower <|> pUpper
+        pIdChar = pLower <|> pUpper <|> pDigit <|> pAnySym "_-"
+
+-- | Raw parser for names: a period separated sequence of name
+-- components.
 pNameRaw :: Parser Name
-pNameRaw = (Name . T.pack) <$> ((:) <$> pLower <*> pList pIdChar)
-  where pIdChar = pLower <|> pUpper <|> pDigit <|> pAnySym "_-"
+pNameRaw = (Name . T.intercalate ".") <$>
+           pList1Sep (pSym '.') pNameComponent
 
 -- | Lexeme parser for names.
 pName :: Parser Name

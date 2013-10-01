@@ -3,7 +3,6 @@ module Main where
 import qualified Data.Text as T
 import Test.Tasty
 import Test.Tasty.QuickCheck
-import Test.QuickCheck
 import Text.ParserCombinators.UU
 import Text.ParserCombinators.UU.BasicInstances hiding (Parser)
 
@@ -17,10 +16,10 @@ main :: IO ()
 main = defaultMain tests
 
 tests :: TestTree
-tests = testGroup "Tests" [ literals ]
+tests = testGroup "Tests" [ literalsGroup, idsGroup ]
 
-literals :: TestTree
-literals = testGroup "Literals"
+literalsGroup :: TestTree
+literalsGroup = testGroup "Literals"
  [ testProperty "Numeric literals" num_literals
  , testProperty "Boolean literals" bool_literals
  ]
@@ -31,11 +30,18 @@ num_literals x = isNumeric x ==> roundTrip pLiteral x
         isNumeric (Double _)  = True
         isNumeric _           = False
 
-bool_literals :: Property
-bool_literals = verbose $ \x -> isBool x ==> roundTrip pLiteral x
+bool_literals :: Literal -> Property
+bool_literals x = isBool x ==> roundTrip pLiteral x
   where isBool (Bool _) = True
         isBool _        = False
 
+idsGroup :: TestTree
+idsGroup = testGroup "Identifiers"
+ [ testProperty "General identifiers" ids
+ ]
+
+ids :: Name -> Bool
+ids = roundTrip pName
 
 
 -- Pretty-printer/parser round-trip testing property.
