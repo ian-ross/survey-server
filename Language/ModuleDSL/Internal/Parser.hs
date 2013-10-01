@@ -27,11 +27,13 @@ pName = lexeme pNameRaw
 -- | Parse a value.
 pLiteral :: Parser Literal
 pLiteral = (String . T.pack) <$> pQuotedString
-     <|> head <$> amb (Double <$> pDouble <|> Integer <$> pInteger)
+     <|> head <$> amb ((\v -> Double . maybe v (const $ v / 100.0)) <$>
+                       pDouble <*> pMaybe (pSym '%') <|>
+                       Integer <$> pInteger)
      <|> Bool <$> pBool
      <|> pReturn Null <* pSymbol "null"
-  where pBool = pReturn True <* pSymbol "true"
-            <|> pReturn False <* pSymbol "false"
+  where pBool = pReturn True  <* (pSymbol "true"  <|> pSymbol "yes")
+            <|> pReturn False <* (pSymbol "false" <|> pSymbol "no")
 
 -- | Parse a single option setting.
 pOption :: Parser Option
@@ -193,3 +195,9 @@ pBraces = brackets '{' '}'
 -- | Bracketed values.
 pBrackets ::  Parser a -> Parser a
 pBrackets = brackets '[' ']'
+
+
+-- | Test function...
+ptest :: Parser a -> String -> (a, [Error LineColPos])
+ptest p s = parse ((,) <$ pSpaces <*> p <* pSpaces <*> pEnd)
+            (createStr (LineColPos 0 0 0) s)

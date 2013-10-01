@@ -1,6 +1,8 @@
 module Main where
 
 import qualified Data.Text as T
+import Test.Tasty
+import Test.Tasty.QuickCheck
 import Test.QuickCheck
 import Text.ParserCombinators.UU
 import Text.ParserCombinators.UU.BasicInstances hiding (Parser)
@@ -12,14 +14,27 @@ import Language.ModuleDSL.Arbitrary ()
 
 
 main :: IO ()
-main = do
-  quickCheck num_literals
+main = defaultMain tests
 
-num_literals :: Property
-num_literals = verbose $ \x -> isNumeric x ==> roundTrip pLiteral x
+tests :: TestTree
+tests = testGroup "Tests" [ literals ]
+
+literals :: TestTree
+literals = testGroup "Literals"
+ [ testProperty "Numeric literals" num_literals
+ , testProperty "Boolean literals" bool_literals
+ ]
+
+num_literals :: Literal -> Property
+num_literals x = isNumeric x ==> roundTrip pLiteral x
   where isNumeric (Integer _) = True
         isNumeric (Double _)  = True
         isNumeric _           = False
+
+bool_literals :: Property
+bool_literals = verbose $ \x -> isBool x ==> roundTrip pLiteral x
+  where isBool (Bool _) = True
+        isBool _        = False
 
 
 

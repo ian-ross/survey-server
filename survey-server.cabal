@@ -143,5 +143,7 @@ Test-Suite dsl-tests
                    base                        >= 4.3      && < 5,
                    containers                  >= 0.4      && < 0.6,
                    QuickCheck                  >= 2.6      && < 2.7,
+                   tasty                       >= 0.3,
+                   tasty-quickcheck            >= 0.3,
                    text                        >= 0.11     && < 0.12,
                    uu-parsinglib               >= 2.8.1    && < 2.9
