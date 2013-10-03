@@ -31,6 +31,23 @@ instance Monoid Name where
 instance RawJS Name where
   rawJS (Name n) = rawJS n
 
+data UnaryOp = NumNeg | NumAbs | NumFloor | NumCeil
+             | LogNot | LogAny | LogAll
+             deriving (Eq, Ord, Show, Data, Typeable)
+
+data BinaryOp = NumAdd | NumSub | NumMul | NumDiv | NumPow
+              | LogAnd | LogOr
+              | CmpEq | CmpNEq | CmpGt | CmpGEq | CmpLt | CmpLeq
+              | CmpEqCI | CmpNEqCI | CmpGtCI | CmpGEqCI | CmpLtCI | CmpLeqCI
+              deriving (Eq, Ord, Show, Data, Typeable)
+
+data Expr = LitExpr Literal
+          | RefExpr Name
+          | UnaryExpr UnaryOp Expr
+          | BinaryExpr BinaryOp Expr Expr
+          | FunExpr Name [Expr]
+          deriving (Eq, Ord, Show, Data, Typeable)
+
 data Option = Option { optKey :: Name
                      , optValue :: Literal }
             deriving (Eq, Ord, Show, Data, Typeable)

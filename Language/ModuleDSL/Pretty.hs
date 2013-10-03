@@ -32,6 +32,46 @@ instance Pretty Literal where
 instance Pretty Name where
   pretty (Name n) = ttext n
 
+instance Pretty UnaryOp where
+  pretty NumNeg = text "-"
+  pretty NumAbs = text "abs"
+  pretty NumFloor = text "floor"
+  pretty NumCeil = text "ceil"
+  pretty LogNot = text "not"
+  pretty LogAny = text "any"
+  pretty LogAll = text "all"
+
+instance Pretty BinaryOp where
+  pretty NumAdd =   text "+"
+  pretty NumSub =   text "-"
+  pretty NumMul =   text "*"
+  pretty NumDiv =   text "/"
+  pretty NumPow =   text "^"
+  pretty LogAnd =   text "and"
+  pretty LogOr =    text "or"
+  pretty CmpEq =    text "=="
+  pretty CmpNEq =   text "/="
+  pretty CmpGt =    text ">"
+  pretty CmpGEq =   text ">="
+  pretty CmpLt =    text "<"
+  pretty CmpLeq =   text "<="
+  pretty CmpEqCI =  text "==@"
+  pretty CmpNEqCI = text "/=@"
+  pretty CmpGtCI =  text ">@"
+  pretty CmpGEqCI = text ">=@"
+  pretty CmpLtCI =  text "<@"
+  pretty CmpLeqCI = text "<=@"
+
+instance Pretty Expr where
+  pretty (LitExpr lit) = pretty lit
+  pretty (RefExpr name) = pretty name
+  pretty (UnaryExpr NumNeg e) = pretty NumNeg <> pretty e
+  pretty (UnaryExpr op e) = pretty op <+> pretty e
+  pretty (BinaryExpr op e1 e2) =
+    parens (pretty e1) <+> pretty op <+> parens (pretty e2)
+  pretty (FunExpr f es) = pretty f <>
+                          (parens $ hsep $ punctuate comma $ map pretty es)
+
 instance Pretty Option where
   pretty (Option k v) = pretty k <> text " = " <> pretty v
 

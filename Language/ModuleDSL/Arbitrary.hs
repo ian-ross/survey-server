@@ -40,22 +40,38 @@ instance Arbitrary Literal where
                     , liftM Bool arbitrary
                     , return Null ]
 
-instance Arbitrary Name where
-  arbitrary = liftM Name nameGenerator
-    where nameGenerator =
-            sized (\ncomp -> do
-                      comps <- replicateM (ncomp + 1)
-                               ((:) <$> inich <*> sized (flip replicateM ch))
-                      return $ T.intercalate "." $ map T.pack comps)
-          inich = frequency [(26, choose ('a', 'z')), (26, choose ('A', 'Z'))]
-          ch = frequency [(26, choose ('a', 'z')), (26, choose ('A', 'Z')),
-                          (2, elements ['_', '-']), (10, choose ('0', '9'))]
-
--- THIS IS A DEFICIENCY IN THE STRING PARSER: WE SHOULD SUPPORT SOME
--- SORT OF ESCAPING FOR QUOTES AND OTHER SPECIAL CHARACTERS.
 okstring :: Gen Text
 okstring = (T.pack . dupquotes) <$> sized (\n -> replicateM n okch)
   where okch = frequency [(10, elements [' ', '"']), (10, choose ('0', '9')),
                           (26, choose ('a', 'z')), (26, choose ('A', 'Z')),
                           (10, choose (' ', '\127') `suchThat` isPrint),
                           (5, choose (' ', '\1024') `suchThat` isPrint)]
+
+instance Arbitrary Name where
+  arbitrary = Name <$> T.intercalate "." . map T.pack . take 3 <$> listOf1 comp
+    where comp = (:) <$> inich <*> listOf ch
+          inich = frequency [(26, choose ('a', 'z')), (26, choose ('A', 'Z'))]
+          ch = frequency [(26, choose ('a', 'z')), (26, choose ('A', 'Z')),
+                          (2, elements ['_', '-']), (10, choose ('0', '9'))]
+
+instance Arbitrary UnaryOp where
+  arbitrary = elements
+              [ NumNeg, NumAbs, NumFloor, NumCeil, LogNot, LogAny, LogAll ]
+
+instance Arbitrary BinaryOp where
+  arbitrary = elements
+              [ NumAdd, NumSub, NumMul, NumDiv, NumPow, LogAnd, LogOr
+              , CmpEq, CmpNEq, CmpGt, CmpGEq, CmpLt, CmpLeq
+              , CmpEqCI, CmpNEqCI, CmpGtCI, CmpGEqCI, CmpLtCI, CmpLeqCI ]
+
+instance Arbitrary Expr where
+  arbitrary = sized expr
+    where expr n
+            | n == 0 = oneof [ liftM LitExpr arbitrary
+                             , liftM RefExpr arbitrary ]
+            | otherwise = oneof [ liftM LitExpr arbitrary
+                                , liftM RefExpr arbitrary
+                                , liftM2 UnaryExpr arbitrary subexpr
+                                , liftM3 BinaryExpr arbitrary subexpr subexpr
+                                , liftM2 FunExpr arbitrary (listOf subexpr) ]
+            where subexpr = expr (n `div` 2)
