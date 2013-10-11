@@ -16,14 +16,13 @@ main :: IO ()
 main = defaultMain tests
 
 tests :: TestTree
-tests = testGroup "Tests" [ literalsGroup, idsGroup ]
-
-literalsGroup :: TestTree
-literalsGroup = testGroup "Literals"
- [ testProperty "Numeric literals" num_literals
- , testProperty "Boolean literals" bool_literals
- , testProperty "String literals"  string_literals
- ]
+tests = testGroup "Tests"
+        [ testProperty "Numeric literals" num_literals
+        , testProperty "Boolean literals" bool_literals
+        , testProperty "String literals"  string_literals
+        , testProperty "General identifiers" ids
+        , testProperty "Expressions" exprs
+        ]
 
 num_literals :: Literal -> Property
 num_literals x = isNumeric x ==> roundTrip pLiteral x
@@ -41,14 +40,11 @@ string_literals x = isString x ==> roundTrip pLiteral x
   where isString (String _) = True
         isString _          = False
 
-idsGroup :: TestTree
-idsGroup = testGroup "Identifiers"
- [ testProperty "General identifiers" ids
- ]
-
 ids :: Name -> Bool
 ids = roundTrip pName
 
+exprs :: Expr -> Bool
+exprs = roundTrip pExpr
 
 -- Pretty-printer/parser round-trip testing property.
 roundTrip :: (Eq a, Pretty a, Arbitrary a) => Parser a -> a -> Bool

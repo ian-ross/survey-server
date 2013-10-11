@@ -31,14 +31,13 @@ instance Monoid Name where
 instance RawJS Name where
   rawJS (Name n) = rawJS n
 
-data UnaryOp = NumNeg | NumAbs | NumFloor | NumCeil
-             | LogNot | LogAny | LogAll
+data UnaryOp = NegOp | AbsOp | FloorOp | CeilOp | NotOp | AnyOp | AllOp
              deriving (Eq, Ord, Show, Data, Typeable)
 
-data BinaryOp = NumAdd | NumSub | NumMul | NumDiv | NumPow
-              | LogAnd | LogOr
-              | CmpEq | CmpNEq | CmpGt | CmpGEq | CmpLt | CmpLeq
-              | CmpEqCI | CmpNEqCI | CmpGtCI | CmpGEqCI | CmpLtCI | CmpLeqCI
+data BinaryOp = AddOp | SubOp | MulOp | DivOp | PowOp
+              | AndOp | OrOp
+              | EqOp | NEqOp | GtOp | GEqOp | LtOp | LeqOp
+              | EqCIOp | NEqCIOp | GtCIOp | GEqCIOp | LtCIOp | LeqCIOp
               deriving (Eq, Ord, Show, Data, Typeable)
 
 data Expr = LitExpr Literal

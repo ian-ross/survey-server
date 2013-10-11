@@ -3,6 +3,7 @@ module Language.ModuleDSL.Internal.Parser where
 
 import Prelude
 import Data.Char
+import Data.Generics hiding (empty)
 import Data.Text (Text)
 import qualified Data.Text as T
 import Text.ParserCombinators.UU
@@ -25,23 +26,97 @@ pNameComponent = T.pack <$> ((:) <$> pIdIniChar <*> pList pIdChar)
 -- | Raw parser for names: a period separated sequence of name
 -- components.
 pNameRaw :: Parser Name
-pNameRaw = (Name . T.intercalate ".") <$>
-           pList1Sep (pSym '.') pNameComponent
+pNameRaw = (Name . T.intercalate ".") <$> pList1Sep (pSym '.') pNameComponent
 
 -- | Lexeme parser for names.
 pName :: Parser Name
-pName = lexeme pNameRaw
+pName = lexeme pNameRaw `micro` 2
 
 -- | Parse a value.
 pLiteral :: Parser Literal
-pLiteral = (String . T.pack) <$> pStringLiteral
-     <|> head <$> amb ((\v -> Double . maybe v (const $ v / 100.0)) <$>
-                       pDouble <*> pMaybe (pSym '%') <|>
-                       Integer <$> pInteger)
-     <|> Bool <$> pBool
-     <|> pReturn Null <* pSymbol "null"
-  where pBool = pReturn True  <* (pSymbol "true"  <|> pSymbol "yes")
-            <|> pReturn False <* (pSymbol "false" <|> pSymbol "no")
+pLiteral =  (String . T.pack) <$> pStringLiteral
+        <|> head <$> amb ((\v -> Double . maybe v (const $ v / 100.0)) <$>
+                          pDouble <*> pMaybe (pSym '%') <|>
+                          Integer <$> pInteger)
+        <|> Bool <$> pBool
+        <|> pReturn Null <* pSymbol "null"
+  where pBool =  pReturn True  <* (pSymbol "true"  <|> pSymbol "yes")
+             <|> pReturn False <* (pSymbol "false" <|> pSymbol "no") `micro` 1
+
+normalise :: Expr -> Expr
+normalise = everywhere (mkT norm)
+  where norm (UnaryExpr NegOp (LitExpr (Integer i))) = LitExpr (Integer (-i))
+        norm (UnaryExpr NegOp (LitExpr (Double d))) = LitExpr (Double (-d))
+        norm x = x
+
+-- | Parse an expression (top-level: logical OR).
+pExpr :: Parser Expr
+pExpr = normalise <$> pChainl ((BinaryExpr OrOp) <$ pSymbol "or") pExprAnd
+
+-- | Parse an expression (logical AND).
+pExprAnd :: Parser Expr
+pExprAnd =  pChainl ((BinaryExpr AndOp) <$ pSymbol "and") pExprComp
+
+-- | Parse an expression (comparison).
+pExprComp :: Parser Expr
+pExprComp =  (\l op r -> BinaryExpr op l r) <$>
+               pExprAdd <*> pCompOp <*> pExprAdd
+         <|> pExprAdd
+  where pCompOp =  EqOp    <$ pSymbol "=="
+               <|> NEqOp   <$ pSymbol "/="
+               <|> GtOp    <$ pSymbol ">"
+               <|> GEqOp   <$ pSymbol ">="
+               <|> LtOp    <$ pSymbol "<"
+               <|> LeqOp   <$ pSymbol "<="
+               <|> EqCIOp  <$ pSymbol "@=="
+               <|> NEqCIOp <$ pSymbol "@/="
+               <|> GtCIOp  <$ pSymbol "@>"
+               <|> GEqCIOp <$ pSymbol "@>="
+               <|> LtCIOp  <$ pSymbol "@<"
+               <|> LeqCIOp <$ pSymbol "@<="
+
+-- | Parse an expression (additive).
+pExprAdd :: Parser Expr
+pExprAdd =  pChainl (prioOps [(AddOp, "+"), (SubOp, "-")]) pExprMul
+
+-- | Parse an expression (multiplicative).
+pExprMul :: Parser Expr
+pExprMul =  pChainl (prioOps [(MulOp, "*"), (DivOp, "/")]) pExprPow
+
+-- | Parse an expression (power operator).
+pExprPow :: Parser Expr
+pExprPow =  pChainr ((BinaryExpr PowOp) <$ pSymbol "^") pExprUnary
+
+-- | Parse an expression (unary).
+pExprUnary :: Parser Expr
+pExprUnary =  UnaryExpr <$> pUnaryOp <*> pExprPrim
+          <|> pExprPrim
+
+-- | Parse an expression (primitive).
+pExprPrim :: Parser Expr
+pExprPrim =  LitExpr <$> pLiteral
+         <|> RefExpr <$> pName
+         <|> FunExpr <$> pName <*> pExprList
+         <|> pParens pExpr
+
+-- | Parse a unary operator.
+pUnaryOp :: Parser UnaryOp
+pUnaryOp =  NegOp   <$ pSymbol "-"
+        <|> AbsOp   <$ pSymbol "abs"
+        <|> FloorOp <$ pSymbol "floor"
+        <|> CeilOp  <$ pSymbol "ceil"
+        <|> NotOp   <$ pSymbol "not"
+        <|> AnyOp   <$ pSymbol "any"
+        <|> AllOp   <$ pSymbol "all"
+
+
+-- | Parse a comma-separated expression list.
+pExprList :: Parser [Expr]
+pExprList = pParens (pList1Sep pComma pExpr `opt` [])
+
+-- | Helper for parsing binary expressions.
+prioOps :: [(BinaryOp, String)] -> Parser (Expr -> Expr -> Expr)
+prioOps oss = foldr (<|>) empty [(BinaryExpr o) <$ pSymbol s | (o, s) <- oss]
 
 -- | String literals: delimited by double quotes, these can contain
 -- any Unicode printing character.  The only character escaping is the
@@ -69,10 +144,10 @@ pChoices = pBraces (pListSep pComma pChoice)
 
 -- | Parse a single question.
 pQuestion :: Parser Question
-pQuestion = (NumericQuestion . T.pack) <$ pSymbol "NumericQuestion" <*>
-            pQuotedString <*> pOptions
-        <|> (ChoiceQuestion . T.pack) <$ pSymbol "ChoiceQuestion" <*>
-            pQuotedString <*> pOptions <*> pChoices
+pQuestion =  (NumericQuestion . T.pack) <$ pSymbol "NumericQuestion" <*>
+               pQuotedString <*> pOptions
+         <|> (ChoiceQuestion . T.pack) <$ pSymbol "ChoiceQuestion" <*>
+               pQuotedString <*> pOptions <*> pChoices
 
 -- | Parse a list of question definitions of the form "n = q".
 pQuestions :: Parser [(Name, Question)]
@@ -81,16 +156,16 @@ pQuestions = pMany ((,) <$> pName <* pSymbol "=" <*> pQuestion)
 -- | Parse a top-level definition: either a survey page or a
 -- parameterised specialisation of a question type.
 pTopLevel :: Parser TopLevel
-pTopLevel = Specialisation <$ pSymbol "Specialisation" <*>
-            pName <*> (pParens (pListSep pComma pName) `opt` [])
-            <* pSymbol "=" <*> pQuestion
-        <|> SurveyPage <$ pSymbol "SurveyPage" <*>
-            pName <*> pOptions <*> pQuestions
+pTopLevel =  Specialisation <$ pSymbol "Specialisation" <*>
+               pName <*> (pParens (pListSep pComma pName) `opt` [])
+               <* pSymbol "=" <*> pQuestion
+         <|> SurveyPage <$ pSymbol "SurveyPage" <*>
+               pName <*> pOptions <*> pQuestions
 
 -- | Parse a module.
 pModule :: Parser Module
 pModule = Module <$ pSymbol "Module" <*>
-          pName <*> pOptions <*> pMany pTopLevel
+            pName <*> pOptions <*> pMany pTopLevel
 
 
 
@@ -163,7 +238,7 @@ pNaturalRaw = foldl (\a b -> a * 10 + b) 0 <$> pList1 pDigitAsNum <?> "Natural"
 
 -- | Raw (non lexeme) parser for integers.
 pIntegerRaw :: (Num a) => Parser a
-pIntegerRaw = pSign <*> pNaturalRaw <?> "Integer"
+pIntegerRaw = pNaturalRaw <?> "Integer"
 
 -- | Raw (non lexeme) parser for doubles.
 pDoubleRaw :: (Read a) => Parser a
@@ -171,18 +246,13 @@ pDoubleRaw = read <$> pDoubleStr
 
 -- | Parse textual representation of a floating point number.
 pDoubleStr :: Parser  [Char]
-pDoubleStr = pOptSign <*> (pToken "Infinity" <|> pPlainDouble)
-             <?> "Double (eg -3.4e-5)"
+pDoubleStr = (pToken "Infinity" <|> pPlainDouble) <?> "Double (eg 3.4e-5)"
   where pPlainDouble = (++) <$> ((++) <$> pList1 pDigit <*>
                                  (pFraction `opt` [])) <*> pExponent
         pFraction = (:) <$> pSym '.' <*> pList1 pDigit
         pExponent = ((:) <$> pAnySym "eE" <*>
                      (pOptSign <*> pList1 pDigit)) `opt` []
         pOptSign = ((('+':) <$ (pSym '+')) <|> (('-':) <$ (pSym '-'))) `opt` id
-
--- | Sign parser for numbers.
-pSign :: (Num a) => Parser (a -> a)
-pSign = (id <$ (pSym '+')) <|> (negate <$ (pSym '-')) `opt` id
 
 -- | Lexeme parser for integers.
 pInteger :: Num a => Parser a

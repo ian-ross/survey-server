@@ -33,39 +33,39 @@ instance Pretty Name where
   pretty (Name n) = ttext n
 
 instance Pretty UnaryOp where
-  pretty NumNeg = text "-"
-  pretty NumAbs = text "abs"
-  pretty NumFloor = text "floor"
-  pretty NumCeil = text "ceil"
-  pretty LogNot = text "not"
-  pretty LogAny = text "any"
-  pretty LogAll = text "all"
+  pretty NegOp = text "-"
+  pretty AbsOp = text "abs"
+  pretty FloorOp = text "floor"
+  pretty CeilOp = text "ceil"
+  pretty NotOp = text "not"
+  pretty AnyOp = text "any"
+  pretty AllOp = text "all"
 
 instance Pretty BinaryOp where
-  pretty NumAdd =   text "+"
-  pretty NumSub =   text "-"
-  pretty NumMul =   text "*"
-  pretty NumDiv =   text "/"
-  pretty NumPow =   text "^"
-  pretty LogAnd =   text "and"
-  pretty LogOr =    text "or"
-  pretty CmpEq =    text "=="
-  pretty CmpNEq =   text "/="
-  pretty CmpGt =    text ">"
-  pretty CmpGEq =   text ">="
-  pretty CmpLt =    text "<"
-  pretty CmpLeq =   text "<="
-  pretty CmpEqCI =  text "==@"
-  pretty CmpNEqCI = text "/=@"
-  pretty CmpGtCI =  text ">@"
-  pretty CmpGEqCI = text ">=@"
-  pretty CmpLtCI =  text "<@"
-  pretty CmpLeqCI = text "<=@"
+  pretty AddOp =   text "+"
+  pretty SubOp =   text "-"
+  pretty MulOp =   text "*"
+  pretty DivOp =   text "/"
+  pretty PowOp =   text "^"
+  pretty AndOp =   text "and"
+  pretty OrOp =    text "or"
+  pretty EqOp =    text "=="
+  pretty NEqOp =   text "/="
+  pretty GtOp =    text ">"
+  pretty GEqOp =   text ">="
+  pretty LtOp =    text "<"
+  pretty LeqOp =   text "<="
+  pretty EqCIOp =  text "@=="
+  pretty NEqCIOp = text "@/="
+  pretty GtCIOp =  text "@>"
+  pretty GEqCIOp = text "@>="
+  pretty LtCIOp =  text "@<"
+  pretty LeqCIOp = text "@<="
 
 instance Pretty Expr where
   pretty (LitExpr lit) = pretty lit
   pretty (RefExpr name) = pretty name
-  pretty (UnaryExpr NumNeg e) = pretty NumNeg <> pretty e
+  pretty (UnaryExpr NegOp e) = pretty NegOp <> pretty e
   pretty (UnaryExpr op e) = pretty op <+> pretty e
   pretty (BinaryExpr op e1 e2) =
     parens (pretty e1) <+> pretty op <+> parens (pretty e2)

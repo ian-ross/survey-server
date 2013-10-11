@@ -35,8 +35,8 @@ instance Arbitrary Option where
 
 instance Arbitrary Literal where
   arbitrary = oneof [ liftM String okstring
-                    , liftM Integer arbitrary
-                    , liftM Double arbitrary
+                    , liftM (Integer . abs) arbitrary
+                    , liftM (Double . abs) arbitrary
                     , liftM Bool arbitrary
                     , return Null ]
 
@@ -55,14 +55,12 @@ instance Arbitrary Name where
                           (2, elements ['_', '-']), (10, choose ('0', '9'))]
 
 instance Arbitrary UnaryOp where
-  arbitrary = elements
-              [ NumNeg, NumAbs, NumFloor, NumCeil, LogNot, LogAny, LogAll ]
+  arbitrary = elements [ NegOp, AbsOp, FloorOp, CeilOp, NotOp, AnyOp, AllOp ]
 
 instance Arbitrary BinaryOp where
-  arbitrary = elements
-              [ NumAdd, NumSub, NumMul, NumDiv, NumPow, LogAnd, LogOr
-              , CmpEq, CmpNEq, CmpGt, CmpGEq, CmpLt, CmpLeq
-              , CmpEqCI, CmpNEqCI, CmpGtCI, CmpGEqCI, CmpLtCI, CmpLeqCI ]
+  arbitrary = elements [ AddOp, SubOp, MulOp, DivOp, PowOp, AndOp, OrOp
+                       , EqOp, NEqOp, GtOp, GEqOp, LtOp, LeqOp
+                       , EqCIOp, NEqCIOp, GtCIOp, GEqCIOp, LtCIOp, LeqCIOp ]
 
 instance Arbitrary Expr where
   arbitrary = sized expr
