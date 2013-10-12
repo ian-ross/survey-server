@@ -34,12 +34,7 @@ instance Pretty Name where
 
 instance Pretty UnaryOp where
   pretty NegOp = text "-"
-  pretty AbsOp = text "abs"
-  pretty FloorOp = text "floor"
-  pretty CeilOp = text "ceil"
-  pretty NotOp = text "not"
-  pretty AnyOp = text "any"
-  pretty AllOp = text "all"
+  pretty NotOp = text "!"
 
 instance Pretty BinaryOp where
   pretty AddOp =   text "+"
@@ -50,13 +45,13 @@ instance Pretty BinaryOp where
   pretty AndOp =   text "and"
   pretty OrOp =    text "or"
   pretty EqOp =    text "=="
-  pretty NEqOp =   text "/="
+  pretty NEqOp =   text "!="
   pretty GtOp =    text ">"
   pretty GEqOp =   text ">="
   pretty LtOp =    text "<"
   pretty LeqOp =   text "<="
   pretty EqCIOp =  text "@=="
-  pretty NEqCIOp = text "@/="
+  pretty NEqCIOp = text "@!="
   pretty GtCIOp =  text "@>"
   pretty GEqCIOp = text "@>="
   pretty LtCIOp =  text "@<"
@@ -65,8 +60,7 @@ instance Pretty BinaryOp where
 instance Pretty Expr where
   pretty (LitExpr lit) = pretty lit
   pretty (RefExpr name) = pretty name
-  pretty (UnaryExpr NegOp e) = pretty NegOp <> pretty e
-  pretty (UnaryExpr op e) = pretty op <+> pretty e
+  pretty (UnaryExpr op e) = pretty op <+> parens (pretty e)
   pretty (BinaryExpr op e1 e2) =
     parens (pretty e1) <+> pretty op <+> parens (pretty e2)
   pretty (FunExpr f es) = pretty f <>

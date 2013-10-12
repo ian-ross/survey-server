@@ -55,7 +55,7 @@ instance Arbitrary Name where
                           (2, elements ['_', '-']), (10, choose ('0', '9'))]
 
 instance Arbitrary UnaryOp where
-  arbitrary = elements [ NegOp, AbsOp, FloorOp, CeilOp, NotOp, AnyOp, AllOp ]
+  arbitrary = elements [ NegOp, NotOp ]
 
 instance Arbitrary BinaryOp where
   arbitrary = elements [ AddOp, SubOp, MulOp, DivOp, PowOp, AndOp, OrOp
@@ -72,4 +72,4 @@ instance Arbitrary Expr where
                                 , liftM2 UnaryExpr arbitrary subexpr
                                 , liftM3 BinaryExpr arbitrary subexpr subexpr
                                 , liftM2 FunExpr arbitrary (listOf subexpr) ]
-            where subexpr = expr (n `div` 2)
+            where subexpr = expr (n `div` 4)

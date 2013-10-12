@@ -43,7 +43,8 @@ pLiteral =  (String . T.pack) <$> pStringLiteral
   where pBool =  pReturn True  <* (pSymbol "true"  <|> pSymbol "yes")
              <|> pReturn False <* (pSymbol "false" <|> pSymbol "no") `micro` 1
 
-normalise :: Expr -> Expr
+-- | Normalise unary negation applications on literal numbers.
+normalise :: Data a => a -> a
 normalise = everywhere (mkT norm)
   where norm (UnaryExpr NegOp (LitExpr (Integer i))) = LitExpr (Integer (-i))
         norm (UnaryExpr NegOp (LitExpr (Double d))) = LitExpr (Double (-d))
@@ -63,13 +64,13 @@ pExprComp =  (\l op r -> BinaryExpr op l r) <$>
                pExprAdd <*> pCompOp <*> pExprAdd
          <|> pExprAdd
   where pCompOp =  EqOp    <$ pSymbol "=="
-               <|> NEqOp   <$ pSymbol "/="
+               <|> NEqOp   <$ pSymbol "!="
                <|> GtOp    <$ pSymbol ">"
                <|> GEqOp   <$ pSymbol ">="
                <|> LtOp    <$ pSymbol "<"
                <|> LeqOp   <$ pSymbol "<="
                <|> EqCIOp  <$ pSymbol "@=="
-               <|> NEqCIOp <$ pSymbol "@/="
+               <|> NEqCIOp <$ pSymbol "@!="
                <|> GtCIOp  <$ pSymbol "@>"
                <|> GEqCIOp <$ pSymbol "@>="
                <|> LtCIOp  <$ pSymbol "@<"
@@ -89,7 +90,7 @@ pExprPow =  pChainr ((BinaryExpr PowOp) <$ pSymbol "^") pExprUnary
 
 -- | Parse an expression (unary).
 pExprUnary :: Parser Expr
-pExprUnary =  UnaryExpr <$> pUnaryOp <*> pExprPrim
+pExprUnary =  UnaryExpr <$> pUnaryOp <*> pExprUnary
           <|> pExprPrim
 
 -- | Parse an expression (primitive).
@@ -102,12 +103,7 @@ pExprPrim =  LitExpr <$> pLiteral
 -- | Parse a unary operator.
 pUnaryOp :: Parser UnaryOp
 pUnaryOp =  NegOp   <$ pSymbol "-"
-        <|> AbsOp   <$ pSymbol "abs"
-        <|> FloorOp <$ pSymbol "floor"
-        <|> CeilOp  <$ pSymbol "ceil"
-        <|> NotOp   <$ pSymbol "not"
-        <|> AnyOp   <$ pSymbol "any"
-        <|> AllOp   <$ pSymbol "all"
+        <|> NotOp   <$ pSymbol "!"
 
 
 -- | Parse a comma-separated expression list.

@@ -31,7 +31,7 @@ instance Monoid Name where
 instance RawJS Name where
   rawJS (Name n) = rawJS n
 
-data UnaryOp = NegOp | AbsOp | FloorOp | CeilOp | NotOp | AnyOp | AllOp
+data UnaryOp = NegOp | NotOp
              deriving (Eq, Ord, Show, Data, Typeable)
 
 data BinaryOp = AddOp | SubOp | MulOp | DivOp | PowOp

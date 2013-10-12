@@ -1,5 +1,6 @@
 module Main where
 
+import Data.Data
 import qualified Data.Text as T
 import Test.Tasty
 import Test.Tasty.QuickCheck
@@ -21,7 +22,7 @@ tests = testGroup "Tests"
         , testProperty "Boolean literals" bool_literals
         , testProperty "String literals"  string_literals
         , testProperty "General identifiers" ids
-        , testProperty "Expressions" exprs
+        , localOption (QuickCheckMaxSize 50) $ testProperty "Expressions" exprs
         ]
 
 num_literals :: Literal -> Property
@@ -44,10 +45,15 @@ ids :: Name -> Bool
 ids = roundTrip pName
 
 exprs :: Expr -> Bool
-exprs = roundTrip pExpr
+exprs = roundTripWith normalise pExpr
 
 -- Pretty-printer/parser round-trip testing property.
-roundTrip :: (Eq a, Pretty a, Arbitrary a) => Parser a -> a -> Bool
-roundTrip p ast = if null errs then res == ast else False
+
+roundTrip :: (Eq a, Pretty a, Arbitrary a, Data a) => Parser a -> a -> Bool
+roundTrip = roundTripWith id
+
+roundTripWith :: (Eq a, Pretty a, Arbitrary a, Data a) =>
+              (a -> a) -> Parser a -> a -> Bool
+roundTripWith norm p ast = if null errs then norm res == norm ast else False
   where (res, errs) = parse ((,) <$ pSpaces <*> p <* pSpaces <*> pEnd) inp
         inp = createStr (LineColPos 0 0 0) (T.unpack $ prettyPrint ast)
