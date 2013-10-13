@@ -23,6 +23,9 @@ instance ToMarkup Name where
 instance ToJavascript Name where
   toJavascript (Name n) = toJavascript $ rawJS n
 
+instance ToJavascript [Name] where
+  toJavascript ns = mconcat $ intersperse "," $ map (toJavascript . rawJS) ns
+
 instance ToMarkup Literal where
   toMarkup (String s) = toMarkup s
   toMarkup (Integer i) = toMarkup i
@@ -47,6 +50,7 @@ instance ToJavascript BinaryOp where
   toJavascript MulOp = "*"
   toJavascript DivOp = "/"
   toJavascript PowOp = "^"       -- WRONG!
+  toJavascript CatOp = "+"
   toJavascript AndOp = "&&"
   toJavascript OrOp = "||"
   toJavascript EqOp = "=="
@@ -97,6 +101,8 @@ instance ToJavascript Expr where
   toJavascript (UnaryExpr op e@(RefExpr _)) = toJavascript op <> toJavascript e
   toJavascript (UnaryExpr op e) =
     toJavascript op <> "(" <> toJavascript e <> ")"
+  toJavascript (BinaryExpr PowOp e1 e2) =
+    "Math.pow(" <> toJavascript e1 <> "," <> toJavascript e2 <> ")"
   toJavascript (BinaryExpr op e1 e2) =
     let Just opfix = fixity op
         js1 = case fixity e1 of
@@ -111,7 +117,7 @@ instance ToJavascript Expr where
                      else toJavascript e2
     in js1 <> toJavascript op <> js2
   toJavascript (FunExpr n es) =
-    toJavascript n <> "(" <>
+    "sc." <> toJavascript n <> "(" <>
     mconcat (intersperse "," $ map toJavascript es) <> ")"
 
 instance Render Module where
@@ -128,6 +134,12 @@ instance Render TopLevel where
         [julius|console.log("Survey page: #{name}");|] <> ss)
   render (Specialisation _name _params _body) =
     (toMarkup ("Specialisation..." :: String), mempty)
+  render (Function name params body) =
+    (mempty, [julius|
+  sc.#{name} = function(#{params}) {
+    return #{body};
+  };
+             |])
 
 instance Render Question where
   render (NumericQuestion name t os) =
@@ -170,8 +182,9 @@ sc.results['#{name}'] = null;
       <div .question>
         <div .question-text>
           <span>
-            #{qt}
+            {{text[0]}}
      |],
      [julius|
 console.log("Text display...");
+sc.text[0] = #{qt};
 |])

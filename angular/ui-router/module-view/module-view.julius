@@ -4,6 +4,7 @@ var ModuleViewCtrl =
 {
   sc.results = { };
   sc.postprocess = { };
+  sc.text = [];
   sc.results = #{toJSON results};
   sc.resultIdx = 0;
   sc.setIdx = function(i) { sc.resultIdx = i; };

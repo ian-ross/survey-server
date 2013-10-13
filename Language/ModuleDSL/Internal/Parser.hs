@@ -78,7 +78,8 @@ pExprComp =  (\l op r -> BinaryExpr op l r) <$>
 
 -- | Parse an expression (additive).
 pExprAdd :: Parser Expr
-pExprAdd =  pChainl (prioOps [(AddOp, "+"), (SubOp, "-")]) pExprMul
+pExprAdd =
+  pChainl (prioOps [(AddOp, "+"), (SubOp, "-"), (CatOp, "<>")]) pExprMul
 
 -- | Parse an expression (multiplicative).
 pExprMul :: Parser Expr
@@ -146,8 +147,8 @@ pQuestion =  (\n t os -> NumericQuestion n (T.pack t) os) <$>
          <|> (\n t os cs -> ChoiceQuestion n (T.pack t) os cs) <$>
                pName <* pSymbol "=" <* pSymbol "ChoiceQuestion" <*>
                pQuotedString <*> pOptions <*> pChoices
-         <|> (TextDisplay . T.pack) <$ pSymbol "TextDisplay" <*>
-               pQuotedString <*> pOptions
+         <|> (TextDisplay) <$ pSymbol "TextDisplay" <*>
+               pExpr <*> pOptions
 
 -- | Parse a list of question definitions of the form "n = q".
 pQuestions :: Parser [Question]
@@ -161,6 +162,9 @@ pTopLevel =  Specialisation <$ pSymbol "Specialisation" <*>
                <* pSymbol "=" <*> pQuestion
          <|> SurveyPage <$ pSymbol "SurveyPage" <*>
                pName <*> pOptions <*> pQuestions
+         <|> Function <$ pSymbol "Function" <*>
+               pName <*> (pParens (pListSep pComma pName))
+               <* pSymbol "=" <*> pExpr
 
 -- | Parse a module.
 pModule :: Parser Module

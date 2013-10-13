@@ -36,6 +36,7 @@ data UnaryOp = NegOp | NotOp
 
 data BinaryOp = AddOp | SubOp | MulOp | DivOp | PowOp
               | AndOp | OrOp
+              | CatOp
               | EqOp | NEqOp | GtOp | GEqOp | LtOp | LeqOp
               | EqCIOp | NEqCIOp | GtCIOp | GEqCIOp | LtCIOp | LeqCIOp
               deriving (Eq, Ord, Show, Data, Typeable)
@@ -66,8 +67,8 @@ data Question = NumericQuestion { nqName :: Name
                                , cqText :: Text
                                , cqOpts :: [Option]
                                , cqChoices :: [Choice] }
-              | TextDisplay { cqText :: Text
-                            , cqOpts :: [Option] }
+              | TextDisplay { tdText :: Expr
+                            , tdOpts :: [Option] }
               deriving (Eq, Ord, Show, Data, Typeable)
 
 data TopLevel = Specialisation { specName :: Name
@@ -76,6 +77,9 @@ data TopLevel = Specialisation { specName :: Name
               | SurveyPage { spName :: Name
                            , spOpts :: [Option]
                            , spQuestions :: [Question] }
+              | Function { fnName :: Name
+                         , fnParams :: [Name]
+                         , fnBody :: Expr }
               deriving (Eq, Ord, Show, Data, Typeable)
 
 data Module = Module { modName :: Name

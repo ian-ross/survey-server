@@ -42,6 +42,7 @@ instance Pretty BinaryOp where
   pretty MulOp =   text "*"
   pretty DivOp =   text "/"
   pretty PowOp =   text "^"
+  pretty CatOp =   text "<>"
   pretty AndOp =   text "and"
   pretty OrOp =    text "or"
   pretty EqOp =    text "=="
@@ -89,7 +90,7 @@ instance Pretty Question where
       text "ChoiceQuestion" <+> doubleQuotes (ttext t) $$
         nest 2 (pretty os $$ pretty cs)
   pretty (TextDisplay t os) =
-    text "TextDisplay" <+> doubleQuotes (ttext t) $$
+    text "TextDisplay" <+> pretty t $$
     nest 2 (pretty os)
 
 instance Pretty TopLevel where
@@ -99,6 +100,10 @@ instance Pretty TopLevel where
     nest 2 (pretty body)
   pretty (SurveyPage nm os qs) =
     text "SurveyPage" <+> pretty nm <+> pretty os $$ (vcat $ map pretty qs)
+  pretty (Function nm ps body) =
+    text "Function" <+> pretty nm <+>
+    parens (hsep $ punctuate comma $ map pretty ps) <+> text "=" $$
+    nest 2 (pretty body)
 
 instance Pretty [TopLevel] where
   pretty ts = vcat $ punctuate (text "") $ map pretty ts
