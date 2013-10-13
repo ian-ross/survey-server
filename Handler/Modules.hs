@@ -95,10 +95,14 @@ getModuleViewR moduleId = do
   let parseResult = ModDSL.parseModule $ moduleContent mdl
       parseView = either (unlines . ModDSL.formatErrors) show parseResult
       ppResult = either (const "") (ModDSL.prettyPrint) parseResult
-      (markup, rawscripts) = either
-                             (const ("Parse failed: can't render!", mempty))
-                             ModDSL.render parseResult
-      rendered = renderHtml markup
+      (rawrendered, rawscripts) =
+        case parseResult of
+          Right m ->
+            let (markup, rs) = ModDSL.render m
+                json = toJSON $ renderHtml markup
+            in ([julius|sc.render = $compile(#{json})(sc);|], rs)
+          Left _ ->
+            ([julius| sc.render = "Parse failed: can't render!";|], mempty)
   acts <- runDB $ selectList [ModuleActivationModule ==. moduleId,
                               ModuleActivationCompleted ==. True]
                              [Asc ModuleActivationDate]
@@ -110,6 +114,7 @@ getModuleViewR moduleId = do
     let qas = map (\(Entity _ (ModuleData _ _ q a)) -> SurveyQ q a) dat
     return $ SurveyAct username ts qas
   scripts <- renderJavascript <$> giveUrlRenderer rawscripts
+  rendered <- renderJavascript <$> giveUrlRenderer rawrendered
   runAngularUIWithLayout appLayout $ do
     $(buildStateUI "module-view")
 

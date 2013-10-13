@@ -124,7 +124,7 @@ pStringLiteral = lexeme $ pSym '"' *> pList ch <* pSym '"'
 
 -- | Parse a single option setting.
 pOption :: Parser Option
-pOption = Option <$> pName <* pSymbol "=" <*> pLiteral
+pOption = Option <$> pName <* pSymbol "=" <*> pExpr
 
 -- | Parse a list of options.
 pOptions :: Parser [Option]
@@ -132,7 +132,7 @@ pOptions = pBrackets (pListSep pComma pOption) `opt` []
 
 -- | Parse a single choice.
 pChoice :: Parser Choice
-pChoice = (Choice . T.pack) <$> pQuotedString <* pSymbol "=>" <*> pLiteral
+pChoice = (Choice . T.pack) <$> pQuotedString <* pSymbol "=>" <*> pExpr
 
 -- | Parse a list of choices.
 pChoices :: Parser [Choice]
@@ -140,14 +140,18 @@ pChoices = pBraces (pListSep pComma pChoice)
 
 -- | Parse a single question.
 pQuestion :: Parser Question
-pQuestion =  (NumericQuestion . T.pack) <$ pSymbol "NumericQuestion" <*>
+pQuestion =  (\n t os -> NumericQuestion n (T.pack t) os) <$>
+               pName <* pSymbol "=" <* pSymbol "NumericQuestion" <*>
                pQuotedString <*> pOptions
-         <|> (ChoiceQuestion . T.pack) <$ pSymbol "ChoiceQuestion" <*>
+         <|> (\n t os cs -> ChoiceQuestion n (T.pack t) os cs) <$>
+               pName <* pSymbol "=" <* pSymbol "ChoiceQuestion" <*>
                pQuotedString <*> pOptions <*> pChoices
+         <|> (TextDisplay . T.pack) <$ pSymbol "TextDisplay" <*>
+               pQuotedString <*> pOptions
 
 -- | Parse a list of question definitions of the form "n = q".
-pQuestions :: Parser [(Name, Question)]
-pQuestions = pMany ((,) <$> pName <* pSymbol "=" <*> pQuestion)
+pQuestions :: Parser [Question]
+pQuestions = pMany pQuestion
 
 -- | Parse a top-level definition: either a survey page or a
 -- parameterised specialisation of a question type.

@@ -70,6 +70,7 @@ instance Pretty Option where
   pretty (Option k v) = pretty k <> text " = " <> pretty v
 
 instance Pretty [Option] where
+  pretty [] = empty
   pretty os = brackets $ hsep $ punctuate comma $ map pretty os
 
 instance Pretty Choice where
@@ -79,13 +80,17 @@ instance Pretty [Choice] where
   pretty cs = braces $ hsep $ punctuate comma $ map pretty cs
 
 instance Pretty Question where
-  pretty (NumericQuestion t os) =
-    text "NumericQuestion" <+> doubleQuotes (ttext t) $$
+  pretty (NumericQuestion n t os) =
+    pretty n <+> text "=" <+>
+      text "NumericQuestion" <+> doubleQuotes (ttext t) $$
+        nest 2 (pretty os)
+  pretty (ChoiceQuestion n t os cs) =
+    pretty n <+> text "=" <+>
+      text "ChoiceQuestion" <+> doubleQuotes (ttext t) $$
+        nest 2 (pretty os $$ pretty cs)
+  pretty (TextDisplay t os) =
+    text "TextDisplay" <+> doubleQuotes (ttext t) $$
     nest 2 (pretty os)
-  pretty (ChoiceQuestion t os cs) =
-    text "ChoiceQuestion" <+> doubleQuotes (ttext t) $$
-    nest 2 (pretty os $$
-            pretty cs)
 
 instance Pretty TopLevel where
   pretty (Specialisation nm ps body) =
@@ -93,8 +98,7 @@ instance Pretty TopLevel where
     parens (hsep $ punctuate comma $ map pretty ps) <+> text "=" $$
     nest 2 (pretty body)
   pretty (SurveyPage nm os qs) =
-    text "SurveyPage" <+> pretty nm <+> pretty os $$
-    (vcat $ map (\(n, q) -> pretty n <+> text "=" <+> pretty q) qs)
+    text "SurveyPage" <+> pretty nm <+> pretty os $$ (vcat $ map pretty qs)
 
 instance Pretty [TopLevel] where
   pretty ts = vcat $ punctuate (text "") $ map pretty ts

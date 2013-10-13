@@ -24,8 +24,10 @@ instance Arbitrary TopLevel where
                     , liftM3 SurveyPage arbitrary arbitrary arbitrary ]
 
 instance Arbitrary Question where
-  arbitrary = oneof [ liftM2 NumericQuestion okstring arbitrary
-                    , liftM3 ChoiceQuestion okstring arbitrary arbitrary ]
+  arbitrary = oneof
+              [ liftM3 NumericQuestion arbitrary okstring arbitrary
+              , liftM4 ChoiceQuestion arbitrary okstring arbitrary arbitrary
+              , liftM2 TextDisplay okstring arbitrary ]
 
 instance Arbitrary Choice where
   arbitrary = liftM2 Choice okstring arbitrary

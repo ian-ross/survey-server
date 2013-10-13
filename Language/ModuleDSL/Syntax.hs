@@ -48,22 +48,26 @@ data Expr = LitExpr Literal
           deriving (Eq, Ord, Show, Data, Typeable)
 
 data Option = Option { optKey :: Name
-                     , optValue :: Literal }
+                     , optValue :: Expr }
             deriving (Eq, Ord, Show, Data, Typeable)
 
-lookupOpt :: Text -> [Option] -> Literal -> Literal
+lookupOpt :: Text -> [Option] -> Expr -> Expr
 lookupOpt k os def = maybe def optValue $ find ((== (Name k)) . optKey) os
 
 
 data Choice = Choice { chText :: Text
-                     , chValue :: Literal }
+                     , chValue :: Expr }
             deriving (Eq, Ord, Show, Data, Typeable)
 
-data Question = NumericQuestion { nqText :: Text
+data Question = NumericQuestion { nqName :: Name
+                                , nqText :: Text
                                 , nqOpts :: [Option] }
-              | ChoiceQuestion { cqText :: Text
+              | ChoiceQuestion { cqName :: Name
+                               , cqText :: Text
                                , cqOpts :: [Option]
                                , cqChoices :: [Choice] }
+              | TextDisplay { cqText :: Text
+                            , cqOpts :: [Option] }
               deriving (Eq, Ord, Show, Data, Typeable)
 
 data TopLevel = Specialisation { specName :: Name
@@ -71,7 +75,7 @@ data TopLevel = Specialisation { specName :: Name
                                , specBody :: Question }
               | SurveyPage { spName :: Name
                            , spOpts :: [Option]
-                           , spQuestions :: [(Name, Question)] }
+                           , spQuestions :: [Question] }
               deriving (Eq, Ord, Show, Data, Typeable)
 
 data Module = Module { modName :: Name
