@@ -9,3 +9,5 @@ cabal-dev/
 yesod-devel/
 /bin/survey-server
 /survey-server.keter
+/doc/crypto-data-storage/crypto-data-storage.aux
+/doc/crypto-data-storage/crypto-data-storage.log
