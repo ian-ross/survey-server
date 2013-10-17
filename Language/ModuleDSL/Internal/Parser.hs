@@ -155,6 +155,9 @@ pQuestion =  (\n t os -> NumericQuestion n (T.pack t) os) <$>
          <|> (\n t os cs -> ChoiceQuestion n (T.pack t) os cs) <$>
                pName <* pSymbol "=" <* pSymbol "ChoiceQuestion" <*>
                pQuotedString <*> pOptions <*> pChoices
+         <|> (\n t os cs -> DropdownQuestion n (T.pack t) os cs) <$>
+               pName <* pSymbol "=" <* pSymbol "DropdownQuestion" <*>
+               pQuotedString <*> pOptions <*> pChoices
          <|> (TextDisplay) <$ pSymbol "TextDisplay" <*>
                pExpr <*> pOptions
 

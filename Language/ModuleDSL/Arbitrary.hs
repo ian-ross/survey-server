@@ -27,6 +27,7 @@ instance Arbitrary Question where
   arbitrary = oneof
               [ liftM3 NumericQuestion arbitrary okstring arbitrary
               , liftM4 ChoiceQuestion arbitrary okstring arbitrary arbitrary
+              , liftM4 DropdownQuestion arbitrary okstring arbitrary arbitrary
               , liftM2 TextDisplay arbitrary arbitrary ]
 
 instance Arbitrary Choice where

@@ -92,6 +92,10 @@ instance Pretty Question where
     pretty n <+> text "=" <+>
       text "ChoiceQuestion" <+> doubleQuotes (ttext t) $$
         nest 2 (pretty os $$ pretty cs)
+  pretty (DropdownQuestion n t os cs) =
+    pretty n <+> text "=" <+>
+      text "DropdownQuestion" <+> doubleQuotes (ttext t) $$
+        nest 2 (pretty os $$ pretty cs)
   pretty (TextDisplay t os) =
     text "TextDisplay" <+> pretty t $$
     nest 2 (pretty os)

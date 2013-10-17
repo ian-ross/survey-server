@@ -94,6 +94,15 @@ assoc AndOp = L
 assoc OrOp  = L
 assoc _     = None              -- Comparison operators.
 
+instance ToJavascript Choice where
+  toJavascript (Choice t v) =
+    "{ label: " <> toJavascript (A.String t) <>
+    ", value: " <> toJavascript v <> "}"
+
+instance ToJavascript [Choice] where
+  toJavascript cs =
+    "[" <> (mconcat $ intersperse "," $ map toJavascript cs) <> "]"
+
 instance ToJavascript Expr where
   toJavascript (LitExpr lit) = toJavascript lit
   toJavascript (RefExpr n) = "sc." <> toJavascript n
@@ -144,6 +153,8 @@ instance Render TopLevel where
   };
              |])
 
+-- RENDER NEEDS TO HAVE SOME SORT OF MONADIC NAME SUPPLY...
+
 instance Render Question where
   render (NumericQuestion name t os) =
     let LitExpr (Integer mn) = lookupOpt "min" os (LitExpr $ Integer 0)
@@ -179,6 +190,20 @@ sc.results['#{name}'] = #{toJSON initVal};
      [julius|
 console.log("Choice question: #{name}");
 sc.results['#{name}'] = null;
+|])
+  render (DropdownQuestion name qt _os cs) =
+    ([shamlet|
+      <div .question>
+        <div .question-text>
+          <span>
+            #{qt}
+          <select ng-model="results['#{name}']"
+                  ng-options="c.label for c in choices">
+     |],
+     [julius|
+console.log("Dropdown question: #{name}");
+sc.choices = #{cs};
+sc.results['#{name}'] = sc.choices[0];
 |])
   render (TextDisplay qt _os) =
     ([shamlet|

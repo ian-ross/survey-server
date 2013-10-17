@@ -68,6 +68,10 @@ data Question = NumericQuestion { nqName :: Name
                                , cqText :: Text
                                , cqOpts :: [Option]
                                , cqChoices :: [Choice] }
+              | DropdownQuestion { ddName :: Name
+                                 , ddText :: Text
+                                 , ddOpts :: [Option]
+                                 , ddChoices :: [Choice] }
               | TextDisplay { tdText :: Expr
                             , tdOpts :: [Option] }
               deriving (Eq, Ord, Show, Data, Typeable)
