@@ -46,6 +46,7 @@ data Expr = LitExpr Literal
           | UnaryExpr UnaryOp Expr
           | BinaryExpr BinaryOp Expr Expr
           | FunExpr Name [Expr]
+          | IfThenElseExpr Expr Expr Expr
           deriving (Eq, Ord, Show, Data, Typeable)
 
 data Option = Option { optKey :: Name

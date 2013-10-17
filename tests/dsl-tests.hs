@@ -4,6 +4,7 @@ import Data.Data
 import qualified Data.Text as T
 import Test.Tasty
 import Test.Tasty.QuickCheck
+--import Test.QuickCheck
 import Text.ParserCombinators.UU
 import Text.ParserCombinators.UU.BasicInstances hiding (Parser)
 
@@ -15,6 +16,7 @@ import Language.ModuleDSL.Arbitrary ()
 
 main :: IO ()
 main = defaultMain tests
+--main = verboseCheckWith (stdArgs { maxSize = 50 }) exprs
 
 tests :: TestTree
 tests = testGroup "Tests"

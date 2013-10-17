@@ -96,7 +96,7 @@ assoc _     = None              -- Comparison operators.
 
 instance ToJavascript Expr where
   toJavascript (LitExpr lit) = toJavascript lit
-  toJavascript (RefExpr n) = toJavascript n
+  toJavascript (RefExpr n) = "sc." <> toJavascript n
   toJavascript (UnaryExpr op e@(LitExpr _)) = toJavascript op <> toJavascript e
   toJavascript (UnaryExpr op e@(RefExpr _)) = toJavascript op <> toJavascript e
   toJavascript (UnaryExpr op e) =
@@ -119,6 +119,9 @@ instance ToJavascript Expr where
   toJavascript (FunExpr n es) =
     "sc." <> toJavascript n <> "(" <>
     mconcat (intersperse "," $ map toJavascript es) <> ")"
+  toJavascript (IfThenElseExpr i t e) =
+    "((" <> toJavascript i <> ") ? (" <>
+         toJavascript t <> ") : (" <> toJavascript e <> "))"
 
 instance Render Module where
   render (Module _name _opts body) = mconcat $ map render body

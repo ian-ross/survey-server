@@ -69,9 +69,11 @@ instance Arbitrary Expr where
     where expr n
             | n == 0 = oneof [ liftM LitExpr arbitrary
                              , liftM RefExpr arbitrary ]
-            | otherwise = oneof [ liftM LitExpr arbitrary
-                                , liftM RefExpr arbitrary
-                                , liftM2 UnaryExpr arbitrary subexpr
-                                , liftM3 BinaryExpr arbitrary subexpr subexpr
-                                , liftM2 FunExpr arbitrary (listOf subexpr) ]
+            | otherwise = oneof
+                          [ liftM LitExpr arbitrary
+                          , liftM RefExpr arbitrary
+                          , liftM2 UnaryExpr arbitrary subexpr
+                          , liftM3 BinaryExpr arbitrary subexpr subexpr
+                          , liftM2 FunExpr arbitrary (listOf subexpr)
+                          , liftM3 IfThenElseExpr subexpr subexpr subexpr ]
             where subexpr = expr (n `div` 4)

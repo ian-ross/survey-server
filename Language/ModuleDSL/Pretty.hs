@@ -66,6 +66,9 @@ instance Pretty Expr where
     parens (pretty e1) <+> pretty op <+> parens (pretty e2)
   pretty (FunExpr f es) = pretty f <>
                           (parens $ hsep $ punctuate comma $ map pretty es)
+  pretty (IfThenElseExpr i t e) = text "if" <+> pretty i $$
+                                  nest 2 (text "then" <+> pretty t $$
+                                          text "else" <+> pretty e)
 
 instance Pretty Option where
   pretty (Option k v) = pretty k <> text " = " <> pretty v

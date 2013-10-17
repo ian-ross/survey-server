@@ -50,9 +50,17 @@ normalise = everywhere (mkT norm)
         norm (UnaryExpr NegOp (LitExpr (Double d))) = LitExpr (Double (-d))
         norm x = x
 
--- | Parse an expression (top-level: logical OR).
+-- | Parse an expression (top-level: if/then/else).
 pExpr :: Parser Expr
-pExpr = normalise <$> pChainl ((BinaryExpr OrOp) <$ pSymbol "or") pExprAnd
+pExpr = normalise <$>
+        ((IfThenElseExpr <$ pSymbol "if"   <*> pExpr
+                         <* pSymbol "then" <*> pExpr
+                         <* pSymbol "else" <*> pExpr)
+         <|> pExprOr)
+
+-- | Parse an expression (logical OR).
+pExprOr :: Parser Expr
+pExprOr = pChainl ((BinaryExpr OrOp) <$ pSymbol "or") pExprAnd
 
 -- | Parse an expression (logical AND).
 pExprAnd :: Parser Expr
