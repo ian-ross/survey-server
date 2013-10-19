@@ -1,6 +1,8 @@
 var RunSurveyCtrl =
-  ['$scope', '$state', '$compile', '$http', '$window', 'addAlert',
-   function(sc, $state, $compile, $http, $window, addAlert)
+  ['$scope', '$state', '$compile', '$http', '$window',
+   'addAlert', 'postprocessor',
+   function(sc, $state, $compile, $http, $window,
+            addAlert, postprocessor)
 {
   sc.results = { };
   sc.postprocess = { };
@@ -11,9 +13,12 @@ var RunSurveyCtrl =
   sc.submitResults = function() {
     console.log("Submitting results...");
     var send = { };
-    for (k in sc.results)
-      send[k] = !isNaN(Number(sc.results[k])) ?
-        Number(sc.results[k]) : sc.results[k];
+    for (k in sc.results) {
+      if (sc.postprocess[k])
+        send[k] = sc.postprocess[k](sc.results[k]);
+      else
+        send[k] = sc.results[k];
+    }
     $http.post('@{SurveyRunR hash}', send).
       success(function (data) {
         if (data.Right) {

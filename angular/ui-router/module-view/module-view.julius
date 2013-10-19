@@ -1,16 +1,18 @@
 var ModuleViewCtrl =
-  ['$scope', '$state', '$compile', '$timeout',
-   function(sc, $state, $compile, $timeout)
+  ['$scope', '$state', '$compile', '$timeout', 'postprocessor',
+   function(sc, $state, $compile, $timeout, postprocessor)
 {
   sc.results = { };
   sc.postprocess = { };
+  sc.choices = [];
   sc.text = [];
-  sc.results = #{toJSON results};
+  sc.surveyResults = #{toJSON results};
   sc.resultIdx = 0;
   sc.setIdx = function(i) { sc.resultIdx = i; };
   sc.$state = $state;
   $state.go('definition');
   #{rawJS scripts};
   #{rawJS rendered};
-  console.log("results = " + JSON.stringify(sc.results));
+
+  sc.dump = function() { console.log(JSON.stringify(sc.results)); };
 }];

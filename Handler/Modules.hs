@@ -116,6 +116,7 @@ getModuleViewR moduleId = do
   scripts <- renderJavascript <$> giveUrlRenderer rawscripts
   rendered <- renderJavascript <$> giveUrlRenderer rawrendered
   runAngularUIWithLayout appLayout $ do
+    $(addSharedModule "postprocessor" True)
     $(buildStateUI "module-view")
 
 postModuleScheduleR :: ModuleId -> Handler Html

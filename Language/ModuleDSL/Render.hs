@@ -176,6 +176,7 @@ instance Render Question where
         [julius|
 console.log("Numeric question: #{name}");
 sc.results['#{name}'] = #{toJSON initVal};
+sc.postprocess['#{name}'] = postprocessor.numeric;
 |])
   render (ChoiceQuestion name qt _os cs) =
     ([shamlet|
@@ -207,6 +208,7 @@ sc.results['#{name}'] = null;
 console.log("Dropdown question: #{name}");
 sc.choices = #{cs};
 sc.results['#{name}'] = sc.choices[0];
+sc.postprocess['#{name}'] = postprocessor.choices;
 |])
   render (TextEntryQuestion name qt _os) =
     ([shamlet|

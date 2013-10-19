@@ -2,3 +2,5 @@
   <h4>Test render
   <div .survey-render>
     <div ng-bind-html-unsafe="render">
+  <button ng-click="dump()">
+    Dump current results

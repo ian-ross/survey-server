@@ -42,6 +42,7 @@ getSurveyRunR hash = do
               scripts <- renderJavascript <$> giveUrlRenderer rawscripts
               runAngularUIWithLayout appLayout $ do
                 $(addSharedModule "alerts" True)
+                $(addSharedModule "postprocessor" True)
                 $(buildStateUI "run-survey")
 
 type Ret = Either Text Text
