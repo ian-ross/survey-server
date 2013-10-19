@@ -72,6 +72,9 @@ data Question = NumericQuestion { nqName :: Name
                                  , ddText :: Text
                                  , ddOpts :: [Option]
                                  , ddChoices :: [Choice] }
+              | TextEntryQuestion { teName :: Name
+                                  , teText :: Text
+                                  , teOpts :: [Option] }
               | TextDisplay { tdText :: Expr
                             , tdOpts :: [Option] }
               deriving (Eq, Ord, Show, Data, Typeable)

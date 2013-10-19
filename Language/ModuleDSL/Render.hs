@@ -205,6 +205,18 @@ console.log("Dropdown question: #{name}");
 sc.choices = #{cs};
 sc.results['#{name}'] = sc.choices[0];
 |])
+  render (TextEntryQuestion name qt _os) =
+    ([shamlet|
+      <div .question>
+        <div .question-text>
+          <span>
+            #{qt}
+          <input type="text" ng-model="results['#{name}']">
+     |],
+     [julius|
+console.log("Text entry question: #{name}");
+sc.results['#{name}'] = '';
+|])
   render (TextDisplay qt _os) =
     ([shamlet|
       <div .question>

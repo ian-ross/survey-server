@@ -4,6 +4,8 @@ var RunSurveyCtrl =
 {
   sc.results = { };
   sc.postprocess = { };
+  sc.choices = [ ];
+  sc.text = [ ];
   #{rawJS scripts};
   sc.render = $compile(#{toJSON rendered})(sc);
   sc.submitResults = function() {
