@@ -107,7 +107,12 @@ pExprPrim :: Parser Expr
 pExprPrim =  LitExpr <$> pLiteral
          <|> RefExpr <$> pName
          <|> FunExpr <$> pName <*> pExprList
+         <|> RecordExpr <$> pRecord
          <|> pParens pExpr
+
+-- | Parse a record.
+pRecord :: Parser [(Name, Expr)]
+pRecord = pBrackets (pListSep pComma ((,) <$> pName <* pSymbol "=" <*> pExpr))
 
 -- | Parse a unary operator.
 pUnaryOp :: Parser UnaryOp
@@ -131,13 +136,9 @@ pStringLiteral = lexeme $ pSym '"' *> pList ch <* pSym '"'
   where ch = head <$> pToken "\"\"" <|> pSatisfy (\c -> isPrint c && c /= '"')
              (Insertion  "Character in a string" 'y' 5)
 
--- | Parse a single option setting.
-pOption :: Parser Option
-pOption = Option <$> pName <* pSymbol "=" <*> pExpr
-
 -- | Parse a list of options.
-pOptions :: Parser [Option]
-pOptions = pBrackets (pListSep pComma pOption) `opt` []
+pOptions :: Parser Options
+pOptions = (Options . RecordExpr) <$> (pRecord `opt` [])
 
 -- | Parse a single choice.
 pChoice :: Parser Choice

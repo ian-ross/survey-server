@@ -69,13 +69,13 @@ instance Pretty Expr where
   pretty (IfThenElseExpr i t e) = text "if" <+> pretty i $$
                                   nest 2 (text "then" <+> pretty t $$
                                           text "else" <+> pretty e)
+  pretty (RecordExpr fs) =
+    brackets $ hsep $ punctuate comma $
+    map (\(k, v) -> pretty k <+> text "=" <+> pretty v) fs
 
-instance Pretty Option where
-  pretty (Option k v) = pretty k <> text " = " <> pretty v
-
-instance Pretty [Option] where
-  pretty [] = empty
-  pretty os = brackets $ hsep $ punctuate comma $ map pretty os
+instance Pretty Options where
+  pretty (Options (RecordExpr [])) = empty
+  pretty (Options r) = pretty r
 
 instance Pretty Choice where
   pretty (Choice t v) = doubleQuotes (ttext t) <> text " => " <> pretty v

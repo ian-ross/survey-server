@@ -131,6 +131,9 @@ instance ToJavascript Expr where
   toJavascript (IfThenElseExpr i t e) =
     "((" <> toJavascript i <> ") ? (" <>
          toJavascript t <> ") : (" <> toJavascript e <> "))"
+  toJavascript (RecordExpr fs) =
+    "{" <> (mconcat $ intersperse "," $
+            map (\(k, v) -> toJavascript k <> "=" <> toJavascript v) fs) <> "}"
 
 instance Render Module where
   render (Module _name _opts body) = mconcat $ map render body

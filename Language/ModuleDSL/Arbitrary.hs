@@ -34,8 +34,8 @@ instance Arbitrary Question where
 instance Arbitrary Choice where
   arbitrary = liftM2 Choice okstring arbitrary
 
-instance Arbitrary Option where
-  arbitrary = liftM2 Option arbitrary arbitrary
+instance Arbitrary Options where
+  arbitrary = liftM (Options . RecordExpr) arbitrary
 
 instance Arbitrary Literal where
   arbitrary = oneof [ liftM String okstring
@@ -77,5 +77,6 @@ instance Arbitrary Expr where
                           , liftM2 UnaryExpr arbitrary subexpr
                           , liftM3 BinaryExpr arbitrary subexpr subexpr
                           , liftM2 FunExpr arbitrary (listOf subexpr)
-                          , liftM3 IfThenElseExpr subexpr subexpr subexpr ]
+                          , liftM3 IfThenElseExpr subexpr subexpr subexpr
+                          , liftM RecordExpr (resize (n `div` 2) arbitrary) ]
             where subexpr = expr (n `div` 4)

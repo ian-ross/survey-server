@@ -47,15 +47,16 @@ data Expr = LitExpr Literal
           | BinaryExpr BinaryOp Expr Expr
           | FunExpr Name [Expr]
           | IfThenElseExpr Expr Expr Expr
+          | RecordExpr [(Name, Expr)]
           deriving (Eq, Ord, Show, Data, Typeable)
 
-data Option = Option { optKey :: Name
-                     , optValue :: Expr }
-            deriving (Eq, Ord, Show, Data, Typeable)
+newtype Options = Options Expr
+                deriving (Eq, Ord, Show, Data, Typeable)
 
-lookupOpt :: Text -> [Option] -> Expr -> Expr
-lookupOpt k os def = maybe def optValue $ find ((== (Name k)) . optKey) os
-
+lookupOpt :: Text -> Options -> Expr -> Expr
+lookupOpt k (Options e) def = case e of
+  RecordExpr os -> maybe def snd $ find ((== (Name k)) . fst) os
+  _             -> def
 
 data Choice = Choice { chText :: Text
                      , chValue :: Expr }
@@ -63,27 +64,27 @@ data Choice = Choice { chText :: Text
 
 data Question = NumericQuestion { nqName :: Name
                                 , nqText :: Text
-                                , nqOpts :: [Option] }
+                                , nqOpts :: Options }
               | ChoiceQuestion { cqName :: Name
                                , cqText :: Text
-                               , cqOpts :: [Option]
+                               , cqOpts :: Options
                                , cqChoices :: [Choice] }
               | DropdownQuestion { ddName :: Name
                                  , ddText :: Text
-                                 , ddOpts :: [Option]
+                                 , ddOpts :: Options
                                  , ddChoices :: [Choice] }
               | TextEntryQuestion { teName :: Name
                                   , teText :: Text
-                                  , teOpts :: [Option] }
+                                  , teOpts :: Options }
               | TextDisplay { tdText :: Expr
-                            , tdOpts :: [Option] }
+                            , tdOpts :: Options }
               deriving (Eq, Ord, Show, Data, Typeable)
 
 data TopLevel = Specialisation { specName :: Name
                                , specParams :: [Name]
                                , specBody :: Question }
               | SurveyPage { spName :: Name
-                           , spOpts :: [Option]
+                           , spOpts :: Options
                            , spQuestions :: [Question] }
               | Function { fnName :: Name
                          , fnParams :: [Name]
@@ -91,7 +92,7 @@ data TopLevel = Specialisation { specName :: Name
               deriving (Eq, Ord, Show, Data, Typeable)
 
 data Module = Module { modName :: Name
-                     , modOpts :: [Option]
+                     , modOpts :: Options
                      , modBody :: [TopLevel] }
               deriving (Eq, Ord, Show, Data, Typeable)
 
