@@ -6,9 +6,11 @@ module Language.ModuleDSL.Render
 
 import Import hiding (Module, Null, String, Bool)
 import Import (String)
+import qualified Import as I
 import Data.List (intersperse)
 import qualified Data.Aeson as A
 import Data.Attoparsec.Number (Number(..))
+import Data.Text.Lazy.Builder
 import Text.Blaze
 import Text.Julius
 import Control.Monad.Trans.State
@@ -103,7 +105,7 @@ instance ToJavascript [Choice] where
 
 instance ToJavascript Expr where
   toJavascript (LitExpr lit) = toJavascript lit
-  toJavascript (RefExpr n) = "sc." <> toJavascript n
+  toJavascript (RefExpr n) = toJavascript n
   toJavascript (UnaryExpr op e@(LitExpr _)) = toJavascript op <> toJavascript e
   toJavascript (UnaryExpr op e@(RefExpr _)) = toJavascript op <> toJavascript e
   toJavascript (UnaryExpr op e) =
@@ -124,7 +126,7 @@ instance ToJavascript Expr where
                      else toJavascript e2
     in js1 <> toJavascript op <> js2
   toJavascript (FunExpr n es) =
-    "sc." <> toJavascript n <> "(" <>
+    toJavascript n <> "(" <>
     mconcat (intersperse "," $ map toJavascript es) <> ")"
   toJavascript (IfThenElseExpr i t e) =
     "((" <> toJavascript i <> ") ? (" <>
@@ -135,10 +137,10 @@ instance ToJavascript Expr where
 
 data RenderState = RenderState { textIdx :: Integer
                                , utilIdx :: Integer
-                               , locals :: [Name] } deriving (Eq, Show)
+                               } deriving (Eq, Show)
 
 initRenderState :: RenderState
-initRenderState = RenderState 0 0 []
+initRenderState = RenderState 0 0
 
 nextTextIdx :: State RenderState Integer
 nextTextIdx = do
@@ -186,9 +188,35 @@ renderTopLevel (Function name params body) =
   return (mempty,
           [julius|
   sc.#{name} = function(#{params}) {
-    return #{body};
+    return #{fscope False params body};
   };
           |])
+
+class Scopeable a where
+  fscope :: I.Bool -> [Name] -> a -> a
+
+instance Scopeable Name where
+  fscope interp ls n@(Name nt)
+    | n `notElem` ls =
+        Name $ (if interp then "" else "sc.") <> "results['" <> nt <> "']"
+    | otherwise      = n
+
+fscope' :: I.Bool -> [Name] -> Name -> Name
+fscope' interp ls n@(Name nt)
+  | not interp && n `notElem` ls = Name $ "sc." <> nt
+  | otherwise      = n
+
+instance Scopeable Expr where
+  fscope i ls (RefExpr n) = RefExpr (fscope i ls n)
+  fscope i ls (UnaryExpr op e) = UnaryExpr op (fscope i ls e)
+  fscope i ls (BinaryExpr op e1 e2) =
+    BinaryExpr op (fscope i ls e1) (fscope i ls e2)
+  fscope i ls (FunExpr n es) = FunExpr (fscope' i ls n) $ map (fscope i ls) es
+  fscope i ls (IfThenElseExpr c t e) =
+    IfThenElseExpr (fscope i ls c) (fscope i ls t) (fscope i ls e)
+  fscope i ls (RecordExpr fs) =
+    RecordExpr $ map (\(k, v) -> (k, fscope i ls v)) fs
+  fscope _ _  (LitExpr l) = LitExpr l
 
 
 instance RunRender Question where runRender = renderQuestion
@@ -252,7 +280,7 @@ renderQuestion (DropdownQuestion name qt _os cs) = do
   console.log("Dropdown question: #{name}");
   sc.text[#{Number (I tidx)}] = #{String qt};
   sc.utils[#{Number (I cidx)}] = #{cs};
-  sc.results['#{name}'] = sc.utils[#{Number (I cidx)}];
+  sc.results['#{name}'] = sc.utils[#{Number (I cidx)}][0];
   sc.postprocess['#{name}'] = postprocessor.choices;
           |])
 
@@ -272,14 +300,13 @@ renderQuestion (TextEntryQuestion name qt _os) = do
           |])
 
 renderQuestion (TextDisplay qt _os) = do
-  tidx <- nextTextIdx
+  let qts = fscope True [] qt
   return ([shamlet|
   <div .question>
     <div .question-text>
       <span>
-        {{text[#{tidx}]}}
+        {{#{preEscapedToMarkup $ toLazyText $ toJavascript qts}}}
           |],
           [julius|
   console.log("Text display...");
-  sc.text[#{Number (I tidx)}] = #{qt};
           |])

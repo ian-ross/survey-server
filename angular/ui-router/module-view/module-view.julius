@@ -4,7 +4,7 @@ var ModuleViewCtrl =
 {
   sc.results = { };
   sc.postprocess = { };
-  sc.choices = [];
+  sc.utils = [];
   sc.text = [];
   sc.surveyResults = #{toJSON results};
   sc.resultIdx = 0;
