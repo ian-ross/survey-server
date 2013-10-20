@@ -48,6 +48,7 @@ data Expr = LitExpr Literal
           | FunExpr Name [Expr]
           | IfThenElseExpr Expr Expr Expr
           | RecordExpr [(Name, Expr)]
+          | ArrayExpr [Expr]
           deriving (Eq, Ord, Show, Data, Typeable)
 
 newtype Options = Options Expr

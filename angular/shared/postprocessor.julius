@@ -1,0 +1,11 @@
+angular.module('postprocessor', []).
+value('postprocessor',
+      { 'numeric':
+        function(n) {
+          return !isNaN(Number(n)) ? Number(n) : n;
+        },
+        'choices':
+        function(c) {
+          return c.hasOwnProperty('label') && c.hasOwnProperty('value') ?
+            c.value : c;
+        } });

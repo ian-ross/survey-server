@@ -108,11 +108,16 @@ pExprPrim =  LitExpr <$> pLiteral
          <|> RefExpr <$> pName
          <|> FunExpr <$> pName <*> pExprList
          <|> RecordExpr <$> pRecord
+         <|> ArrayExpr <$> pArray
          <|> pParens pExpr
 
 -- | Parse a record.
 pRecord :: Parser [(Name, Expr)]
-pRecord = pBrackets (pListSep pComma ((,) <$> pName <* pSymbol "=" <*> pExpr))
+pRecord = pBraces (pListSep pComma ((,) <$> pName <* pSymbol "=" <*> pExpr))
+
+-- | Parse an array.
+pArray :: Parser [Expr]
+pArray = pBrackets (pListSep pComma pExpr)
 
 -- | Parse a unary operator.
 pUnaryOp :: Parser UnaryOp
@@ -146,7 +151,7 @@ pChoice = (Choice . T.pack) <$> pQuotedString <* pSymbol "=>" <*> pExpr
 
 -- | Parse a list of choices.
 pChoices :: Parser [Choice]
-pChoices = pBraces (pListSep pComma pChoice)
+pChoices = pParens (pListSep pComma pChoice)
 
 -- | Parse a single question.
 pQuestion :: Parser Question

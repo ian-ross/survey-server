@@ -70,8 +70,9 @@ instance Pretty Expr where
                                   nest 2 (text "then" <+> pretty t $$
                                           text "else" <+> pretty e)
   pretty (RecordExpr fs) =
-    brackets $ hsep $ punctuate comma $
+    braces $ hsep $ punctuate comma $
     map (\(k, v) -> pretty k <+> text "=" <+> pretty v) fs
+  pretty (ArrayExpr es) = brackets $ hsep $ punctuate comma $ map pretty es
 
 instance Pretty Options where
   pretty (Options (RecordExpr [])) = empty
@@ -81,7 +82,7 @@ instance Pretty Choice where
   pretty (Choice t v) = doubleQuotes (ttext t) <> text " => " <> pretty v
 
 instance Pretty [Choice] where
-  pretty cs = braces $ hsep $ punctuate comma $ map pretty cs
+  pretty cs = parens $ hsep $ punctuate comma $ map pretty cs
 
 instance Pretty Question where
   pretty (NumericQuestion n t os) =

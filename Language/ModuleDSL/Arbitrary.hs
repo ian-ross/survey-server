@@ -78,5 +78,6 @@ instance Arbitrary Expr where
                           , liftM3 BinaryExpr arbitrary subexpr subexpr
                           , liftM2 FunExpr arbitrary (listOf subexpr)
                           , liftM3 IfThenElseExpr subexpr subexpr subexpr
-                          , liftM RecordExpr (resize (n `div` 2) arbitrary) ]
+                          , liftM RecordExpr (resize (n `div` 2) arbitrary)
+                          , liftM ArrayExpr (resize (n `div` 2) arbitrary) ]
             where subexpr = expr (n `div` 4)
