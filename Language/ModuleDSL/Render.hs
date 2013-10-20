@@ -218,6 +218,7 @@ instance Scopeable Expr where
     IfThenElseExpr (fscope i ls c) (fscope i ls t) (fscope i ls e)
   fscope i ls (RecordExpr fs) =
     RecordExpr $ map (\(k, v) -> (k, fscope i ls v)) fs
+  fscope i ls (ArrayExpr es) = ArrayExpr $ map (fscope i ls) es
   fscope _ _  (LitExpr l) = LitExpr l
 
 
@@ -286,19 +287,24 @@ renderQuestion (DropdownQuestion name qt _os cs) = do
   sc.postprocess['#{name}'] = postprocessor.choices;
           |])
 
-renderQuestion (TextEntryQuestion name qt _os) = do
+renderQuestion (TextEntryQuestion name qt os) = do
   tidx <- nextTextIdx
+  uidx <- nextUtilIdx
+  let size = lookupOpt "size" os (LitExpr $ String "small")
   return ([shamlet|
   <div .question>
     <div .question-text>
-      <span>
+      <div>
         {{text[#{tidx}]}}
-      <input type="text" ng-model="results['#{name}']">
+      <div ng-switch on="utils[#{uidx}]">
+        <textarea ng-switch-when="large" ng-model="results['#{name}']">
+        <input ng-switch-default type="text" ng-model="results['#{name}']">
           |],
           [julius|
   console.log("Text entry question: #{name}");
   sc.text[#{Number (I tidx)}] = #{String qt};
   sc.results['#{name}'] = '';
+  sc.utils[#{Number (I uidx)}] = #{size};
           |])
 
 renderQuestion (TextDisplay qt _os) = do
