@@ -134,6 +134,8 @@ instance ToJavascript Expr where
   toJavascript (RecordExpr fs) =
     "{" <> (mconcat $ intersperse "," $
             map (\(k, v) -> toJavascript k <> "=" <> toJavascript v) fs) <> "}"
+  toJavascript (ArrayExpr es) =
+    "[" <> (mconcat $ intersperse "," $ map toJavascript es) <> "]"
 
 data RenderState = RenderState { textIdx :: Integer
                                , utilIdx :: Integer
