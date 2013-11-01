@@ -1,0 +1,439 @@
+\documentclass[DIV=calc,paper=a4,fontsize=11pt]{scrartcl}
+
+\usepackage{lipsum}
+\usepackage[english]{babel}
+\usepackage{fourier}
+\usepackage[protrusion=true,expansion=true]{microtype}
+\usepackage{amsmath,amsfonts,amsthm}
+\usepackage[svgnames]{xcolor}
+\usepackage[hang,small,labelfont=bf,up,textfont=it,up]{caption}
+\usepackage{booktabs}
+\usepackage{fix-cm}
+\usepackage{graphicx}
+\usepackage{url}
+
+\usepackage{sectsty}
+\allsectionsfont{\usefont{OT1}{phv}{b}{n}}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\usepackage{lastpage}
+
+\usepackage{fancyvrb}
+
+% Headers - all currently empty
+\lhead{}
+\chead{}
+\rhead{}
+
+% Footers
+\lfoot{}
+\cfoot{}
+\rfoot{\footnotesize Page \thepage\ of \pageref{LastPage}}
+
+\renewcommand{\headrulewidth}{0.0pt} % No header rule
+\renewcommand{\footrulewidth}{0.0pt} % Thin footer rule
+
+\usepackage{titling}
+
+\newcommand{\HorRule}{\color{DarkGrey}\rule{\linewidth}{2pt}}
+
+\begin{document}
+
+\DefineShortVerb{\|}
+
+\begin{flushleft}
+  \fontsize{20}{20}
+  \usefont{OT1}{phv}{b}{n}
+  \selectfont
+Ian's notes
+\end{flushleft}
+\vspace{-10pt}
+
+\thispagestyle{fancy}
+
+\section*{Database Schema}
+
+This is super-simple:
+
+\begin{itemize}
+  \item{The usual |User| and |RMCookie| stuff for login management.}
+  \item{A |Module| table for module definitions (at the moment, just a
+    title, the module definition as text, and the module owner).
+    Should eventually be expanded to include a |VERSION| column (see
+    below for a bit more about this).}
+  \item{A |ModuleActivation| table recording surveys scheduled for a
+    given user.  This is the table that records the hash linking a
+    user and a module activation.}
+  \item{A |ModuleData| table that holds survey results.  This has
+    columns to record the module activation hash, the module ID, the
+    name of the question (in the module DSL, questions are always
+    given as |name = BlahQuestion parameters| and these are the names
+    that appear in this table) and a textual answer value.}
+\end{itemize}
+
+\section*{Module DSL}
+
+\begin{itemize}
+  \item{\textbf{IMPORTANT} Need to get the error handling for the
+    module DSL really right: there should be \emph{no} Javascript
+    errors!}
+  \item{Low-level syntax: the current synyax doesn't use layout;
+    instead it's kind of a ``wordy'' language where the presence of
+    keywords gives enough information to produce an unambiguous parse.
+    I hadn't quite decided whether this was the best way to do things,
+    but I think it might be more effective for allowing non-programmer
+    users to write modules than having an offside rule approach.
+    ``Wordiness'' also makes life easier if you have macros.}
+  \item{Some things to add to expression syntax: |case ... of|
+    selection, |let ... in| or |where| for local names in more
+    complicated expressions.}
+  \item{Question types: at the moment, these are individual
+    constructors of the |Question| data type, mostly to keep things
+    simple as I started implementing them, but that's not a very
+    extensible way of doing things.  I hadn't settled on a really good
+    way of representing these things.}
+  \item{Development plan (such as it is):
+    \begin{description}
+      \item[V0.1]{Pretty much done, except for module metadata and a
+        distingushed ``activation'' component for modules:
+        \begin{enumerate}
+          \item{Basic syntax: literals (numeric, string, boolean,
+            arrays, records); identifiers; simple expressions}
+          \item{Module definitions: framework, metadata, component
+            contents, distinguished ``activation'' component}
+          \item{Function definitions: pure call-by-value only}
+          \item{Fixed component definitions: |SurveyPage|, 3-4
+            |Question| types}
+          \item{Data collection infrastructure}
+        \end{enumerate}}
+      \item[V0.2]{Not started:
+        \begin{enumerate}
+          \item{Add more question types}
+          \item{Parameterised modules}
+          \item{???}
+        \end{enumerate}}
+    \end{description}}
+  \item{Needs to be multilingual from the start:
+    \begin{itemize}
+     \item{Define default language at top of module: |language=none|
+       means ``text'' values are IDs in message files; |language=de|,
+       |language=de_CH| work as you'd expect.}
+     \item{Need some sort of textual interpolation for inserting
+       numbers, pluralisation, etc.  (shakespeare-i18n?).}
+     \item{Message files as part of the module bundle: either going
+       from an ID to a natural language string, or from language A to
+       language B.}
+     \item{Should have a utility in the ``Module Mall'' to build a
+       null translation file from a module by pulling out all the
+       unique text elements, and for checking translation files
+       against module text elements.}
+    \end{itemize}}
+  \item{Things that are needed that I've thought about but haven't
+    started:
+    \begin{itemize}
+      \item{LimeSurvey import (from XML format).}
+      \item{Containers for pages with choice and sequencing --
+        basically, this would be another kind of |TopLevel| called
+        |Container| or something that you could name.  I've not
+        thought very much about how to make sequencing and choice work
+        in the kind of declarative framework I've been using, but I
+        don't think it would be that hard to do.}
+      \item{Modularisation: registration and naming of modules,
+        referencing and linking modules via imports.}
+      \item{Module metadata: this could either be done as part of the
+        ``module options'' or using some other syntax.}
+      \item{Other module types: not really any idea how to do this --
+        embedding of items defined in other ways into an |IFRAME|
+        container or something like that?  Really need to assess the
+        feasibility of embedding to know whether we need to support a
+        richer model in the DSL.}
+    \end{itemize}}
+  \item{Rendering ideas:
+    \begin{itemize}
+      \item{How about defining survey elements in terms of basic UI
+        elements, so there is a Core module language with more complex
+        elements done via desugaring?}
+      \item{Example:
+        \begin{itemize}
+          \item{Full DSL: |smoker = YesNo "Do you smoke?"|}
+          \item{Core DSL:
+            \begin{Verbatim}
+smoker = Div.yesno-question
+   Text.choice-label "Do you smoke?"
+   Choice "Yes" -> True
+          "No"  -> False
+\end{Verbatim}
+}
+        \end{itemize}}
+      \item{The processing flow for rendering a module would then be
+        something like this:}
+    \end{itemize}}
+\end{itemize}
+
+{\tiny
+\begin{Verbatim}
+[Module] -> (Parse) -> [ModAST] -> (Check) -> (Desugar) -> [CoreAST] -> (Translate) -> (Render) -> [HTML+CSS+JS]
+               |                      |                                      |
+               v                      v                                      v
+         Syntax errors          Unique names                          (given target
+                               Name resolution                         language and
+                                                                    translation files)
+\end{Verbatim}
+}
+
+\section*{Module definitions}
+
+Need some way of identifying the ``main'' top-level component to be
+activated when a module is loaded (probably just make it so that the
+survey page called ``main'' is activated).  The point here is that
+there can be multiple top-level components (survey pages, for example)
+within a single module, and eventually it should be possible to change
+the ``activated'' top-level component as a result of user selections.
+
+
+\section*{Server code}
+
+\begin{itemize}
+  \item{The email/password authentication works more or less the same
+    as in BayesHive, and it makes the same assumption: that it can
+    transmit passwords in plaintext because the site will only ever be
+    accessed via HTTPS.}
+  \item{The same |Angular.UIRouter| code as in BayesHive is used for
+    serving up Angular |ui-router| pages.}
+  \item{I've written some little stuff (in |Foundation.hs| and
+    |angular/shared/alerts.julius|) to integrate Yesod's messages (à
+    la |setMessage|) with Bootstrap alerts.  Instead of calling
+    |setMessage|, you call |setAlert| (or |setAlertI| for
+    internationalisation) with an alert type (|Error|, |Warn|, |Info|,
+    |OK|) and a message.  The client-side code maintains a list of
+    current alerts and there's an Angular directive called
+    |<alert-list>| you use to put them somewhere on the page.}
+  \item{In the code to actually run surveys (|getSurveyRunR| in
+    |Handler.Survey|), there are a couple of error cases that in an
+    ideal world wouldn't crop up at all.  In particular, it shouldn't
+    be possible to create a module activation for a module that has
+    errors.  To make this really true, it will be necessary to have
+    module versioning, so that it's possible to edit a module
+    definition while still having module activations referring to a
+    ``known good'' module definition.  In the presence of module
+    imports, it will be necessary to keep track of the correct
+    versions of imported modules to use to go with a given version of
+    a module.  This won't be hard to do: have a |VERSION| column in
+    the module definition table that contains the version value for
+    ``published'' modules, or NULL for any edited version of a module
+    that hasn't yet been made available for use, along with a separate
+    table to record the version dependencies with entries saying
+    ``Version X.X of module A depends on version Y.Y of module B''.
+    That way, resolving module versions for imports is just a matter
+    of traversing this dependency graph, and you can have different
+    modules depending on different historical versions of other module
+    at the same time, without any interference.}
+\end{itemize}
+
+
+\section*{Original notes (a bit braindumpy...)}
+
+\subsection*{Basic syntax}
+
+\subsubsection*{Layout}
+
+\begin{itemize}
+  \item{Use the same ``optional layout'' approach as Haskell?
+    I.e. layout converts to |{ ... ; ... ; ... }| on lexing?}
+  \item{How does this work with macros?}
+\end{itemize}
+
+\subsubsection*{Identifiers}
+
+\begin{itemize}
+  \item{In general, identifiers begin with a letter and contain only
+    letters, digits, |_| (underscore), |-| (hyphen) or |.| (period).
+    Regular expression: |/[a-zA-Z][a-zA-Z0-9_-.]*/| (actually slightly
+    different because of Unicode letters).}
+  \item{Module identifiers are a series of period-separated
+    identifiers, each of which begins with a letter.  Regular
+    expression: |/[A-Za-z][a-zA-Z0-9_-]*(\.[A-Za-z][a-zA-Z0-9_-]*)*/|
+    (again with the letters...).}
+  \item{Namespace identifiers follow the same rules as module
+    identifiers.}
+  \item{Some identifiers are reserved as keywords.}
+  \item{Keywords are case-insensitive.  User-defined identifiers are
+    case-sensitive.  (I've not actually implemented this properly
+    yet.)}
+\end{itemize}
+
+\subsubsection*{Literals}
+
+\begin{itemize}
+  \item{Numeric literals: |123|, |1.4|, |-0.5E-6|, |25%|}
+  \item{String literals: |"abc"|, |"Hello, ""Bob""!"| (the only escape
+    sequence is |""| for double quote)}
+  \item{Boolean literals: |true|, |yes|; |false|, |no| (all options
+    equivalent when boolean value required).}
+  \item{Vector/array literals: |[ 1, 2, 3 ]|, |[ true, false, false ]|
+    (heterogeneous).  Equivalent to |[ 0 => 1, 1 => 2, 2 => 3 ]|,
+    i.e. treated the same as maps/records.}
+  \item{Map/record literals: |{ a = 1.2, b = "abc", XC5 = false }| --
+    this is a bit more restricted than ideal: it should be possible to
+    use identifiers, strings or numeric values as keys.}
+\end{itemize}
+
+
+\subsubsection*{Expressions}
+
+The usual kind of thing:
+\begin{itemize}
+  \item{Numeric operators: |+|, |-|, |*|, |/|, |^|}
+  \item{Comparison operators: |==|, |/=|, |<=|, |>=|, etc., plus
+    case-insensitive versions, like |@==|, |@/=|, etc.}
+  \item{Boolean operators: |and|, |or|, |not|}
+  \item{Function applications: |f(1, 2)|, |myFunc(x, "abc")|,
+    |floor(x)|, etc.}
+  \item{Conditional expressions: |if a then 1 else 2|, etc.}
+\end{itemize}
+
+
+\subsubsection*{Definitions}
+
+\begin{itemize}
+  \item{General language features:
+    \begin{itemize}
+      \item{Functions: call-by-value or call-by-reference?  Allow
+        both, but require call-by-reference to be explicitly flagged?}
+      \item{Macros: need to think about these -- some sort of
+        backquote-like templating scheme?}
+      \item{Modules: what can go in a module? what happens when a
+        module is activated?  (Distinguished |main| component?)}
+      \item{Enumerations: basically just a way to map between
+        identifiers and some numeric or textual representation.}
+    \end{itemize}}
+  \item{Application-specific features:
+    \begin{itemize}
+      \item{Components: |SurveyPage|, |Question|, etc.}
+      \item{Assets: images, video, audio.}
+      \item{Translations: base language to other languages;
+        templating/functional approach for pluralisation and word
+        order issues.}
+      \item{Help/description text: message catalogue approach?  Plays
+        nicely with translation.}
+      \item{Module metadata: simple key/value block (like Cobolo
+        |DESCRIPTION SECTION|!).}
+    \end{itemize}}
+\end{itemize}
+
+
+\subsection*{Namespaces}
+
+\begin{itemize}
+  \item{\emph{Modules} live in \emph{namespaces}, e.g. |base|,
+    |openPsych|, |openPsych.Tests|, |ClinicA|, etc.}
+  \item{Within each namespace, module names can be considered
+    hierarchically, e.g. |SubstanceAbuse.MoodSurvey|, but this is not
+    necessary.}
+  \item{Naming: |<namespace>:<module>| gives namespace explicitly,
+    e.g. |ClinicA:Utils.Logo|, |openPsych:Tests.StroopTest|; without
+    namespace, a module name references the first matching module in a
+    namespace search path.}
+  \item{A namespace is essentially a record containing modules; a module
+   is essentially a record containing definitions of various kinds.}
+  \item{Defining modules:
+    \begin{Verbatim}
+     namespace openPsych           -- Defines the namespace for all
+                                   -- further definitions in the file
+     module Simple.MoodSurvey
+       ...
+\end{Verbatim}
+}
+  \item{Setting namespace search path:
+    \begin{Verbatim}
+     use namespace ClinicA as A
+     use namespace openPsych
+\end{Verbatim}
+   or
+    \begin{Verbatim}
+     use namespace ClinicA as A, openPsych as oP
+\end{Verbatim}
+}
+  \item{Namespace |base| available by default.}
+  \item{Namespaces searched in order given in |use namespace|
+    declarations.}
+  \item{Aliasing with |use namespace ... as ...|.}
+  \item{Parameterisation over namespaces:
+    \begin{Verbatim}
+     module Simple.MoodSurvey(styleNamespace)
+       use namespace styleNamespace
+       ...
+    \end{Verbatim}
+   which can then be used as
+    \begin{Verbatim}
+     use namespace ClinicA
+     activate Simple.MoodSurvey(ClinicA)
+\end{Verbatim}
+}
+\end{itemize}
+
+
+\subsection*{Survey element types}
+
+In LimeSurvey, questions must be members of \emph{question groups}.
+Normally all questions in a group are displayed together and the
+groups are displayed one after another.  It's possible to assign
+groups to ``randomisation sets'', within which the group ordering is
+randomised each time the survey is used.  It's also possible to show
+and hide groups based on responses to earlier questions.
+
+There is an ``Expression Manager'' that allows you to interpolate
+expressions based on results of earlier questions into the text of
+later questions, to control whether or not a question appears based on
+Boolean conditions, and so on.
+
+LimeSurvey question types:
+
+\begin{Verbatim}
+4.1 Arrays
+ 4.1.1 Array
+   General "sub-questions with discrete choices" setup.  All the
+   others are specialisations of this.  So, provide a general
+   parameterisable array question type and then implement all the
+   others as specialisations of this.
+ 4.1.2 Array (5 point choice)
+ 4.1.3 Array (10 point choice)
+ 4.1.4 Array (Yes/No/Uncertain)
+ 4.1.5 Array (Increase/Same/Decrease)
+ 4.1.6 Array by column
+ 4.1.7 Array dual scale
+ 4.1.8 Array (Numbers)
+ 4.1.9 Array (Text)
+4.2 Mask questions
+  Specialised "don't fit anywhere else" question types.
+ 4.2.1 Date
+ 4.2.2 File upload
+ 4.2.3 Gender
+ 4.2.4 Language switch
+ 4.2.5 Numerical input
+ 4.2.6 Multiple numerical input
+ 4.2.7 Ranking
+ 4.2.8 Text display
+ 4.2.9 Yes/No
+ 4.2.10 Equation
+4.3 Multiple choice questions
+  Really "multiple" choice: checkboxes.
+ 4.3.1 Multiple choice
+ 4.3.2 Multiple choice with comments
+4.4 Single choice questions
+  Radio boxes and lists.
+ 4.4.1 5 point choice
+ 4.4.2 List (Dropdown)
+ 4.4.3 List (Radio)
+ 4.4.4 List with comment
+4.5 Text questions
+   Basically just different sizes of text entry.
+ 4.5.1 Short free text
+ 4.5.2 Long free text
+ 4.5.3 Huge free text
+ 4.5.4 Multiple short text
+\end{Verbatim}
+
+\end{document}
+
