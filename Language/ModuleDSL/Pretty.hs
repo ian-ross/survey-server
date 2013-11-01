@@ -1,4 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
+-- | Pretty printer for module DSL -- follow standard Hughes & Peyton
+-- Jones approach using Text.PrettyPrint.
+--
 module Language.ModuleDSL.Pretty
        ( Pretty(..)
        , prettyPrint ) where

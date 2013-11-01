@@ -4,14 +4,24 @@ var RunSurveyCtrl =
    function(sc, $state, $compile, $http, $window,
             addAlert, postprocessor)
 {
+  // Set up Angular scope variables used by rendered modules.
   sc.results = { };
   sc.postprocess = { };
   sc.utils = [ ];
   sc.text = [ ];
+
+  // Incorporate Javascript for rendered module.
   #{rawJS scripts};
+
+  // Compile the rendered module HTML for use in ng-bind-html-unsafe
+  // in the partial page template.
   sc.render = $compile(#{toJSON rendered})(sc);
+
+  // Result submission handler.
   sc.submitResults = function() {
     console.log("Submitting results...");
+    // Post-process results as required, gathering the answers for
+    // each question into the send record.
     var send = { };
     for (k in sc.results) {
       if (sc.postprocess[k])
@@ -19,6 +29,9 @@ var RunSurveyCtrl =
       else
         send[k] = sc.results[k];
     }
+
+    // Try to submit the survey results.  If we're successful,
+    // redirect to the home page.
     $http.post('@{SurveyRunR hash}', send).
       success(function (data) {
         if (data.Right) {

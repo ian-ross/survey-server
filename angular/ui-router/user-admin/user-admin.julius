@@ -2,7 +2,10 @@ var UserAdminCtrl =
   ['$scope', '$http', 'addAlert',
     function(sc, $http, addAlert)
 {
+  // Model for admin flag checkboxes.
   sc.admin = { };
+
+  // Set/reset the admin privileges bit for a user.
   sc.setAdmin = function(uid) {
     $http.post('/user/' + uid + '/modify/' + (sc.admin[uid] ? 1 : 0)).
       success(function (data) {

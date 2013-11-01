@@ -1,4 +1,7 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes #-}
+-- | Public interface to module DSL parser.  Most of the real work is
+-- done in "Language.ModuleDSL.Internal.Parser".
+--
 module Language.ModuleDSL.Parser
        ( parseModule
        , formatErrors ) where
@@ -13,7 +16,7 @@ import Language.ModuleDSL.Syntax
 import Language.ModuleDSL.Internal.Parser
 
 
--- | Format errors for display.
+-- | Format parse errors for display.
 formatErrors :: [Error LineColPos] -> [String]
 formatErrors = map formatError
   where formatError (Inserted s p e) =

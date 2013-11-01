@@ -1,3 +1,9 @@
+// Simple post-processors for survey results: "numeric" is used to
+// make sure that numerical Javascript values are transmitted as
+// numbers instead of strings; "choices" is used to deal with the
+// label/value structures used for radio button and drop-down
+// questions.
+
 angular.module('postprocessor', []).
 value('postprocessor',
       { 'numeric':

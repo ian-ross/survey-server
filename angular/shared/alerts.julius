@@ -1,3 +1,9 @@
+// Simple alert handling for Angular applications that plays nicely
+// with Bootstrap's alert mechanism.  The addAlert function allows you
+// to add a new alert to the current alert list, while the
+// <alert-list> directive allows you to drop the current list of
+// alerts into a page, each with a dismissal button.
+
 angular.module('alerts', []).
 value('currentAlerts', []).
 factory('addAlert', ['currentAlerts', function(currentAlerts)

@@ -2,17 +2,28 @@ var ModuleViewCtrl =
   ['$scope', '$state', '$compile', '$timeout', 'postprocessor',
    function(sc, $state, $compile, $timeout, postprocessor)
 {
+  // Set up Angular scope variables used by rendered modules.
   sc.results = { };
   sc.postprocess = { };
   sc.utils = [];
   sc.text = [];
+
+  // Set up survey results for "module-results" panel.
   sc.surveyResults = #{toJSON results};
   sc.resultIdx = 0;
   sc.setIdx = function(i) { sc.resultIdx = i; };
+
+  // Start on "definition" panel.
   sc.$state = $state;
   $state.go('definition');
+
+  // Incorporate Javascript for rendered module.
   #{rawJS scripts};
+
+  // Incorporate rendered module HTML for use in ng-bind-html-unsafe
+  // in the "test-render" panel.
   #{rawJS rendered};
 
+  // Debug code.
   sc.dump = function() { console.log(JSON.stringify(sc.results)); };
 }];

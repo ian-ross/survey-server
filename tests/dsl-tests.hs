@@ -1,3 +1,11 @@
+-- | Round-trip QuickCheck testing of the module DSL parser.  The idea
+-- here is to generate arbitrary ASTs (using the 'Arbitrary' instances
+-- defined in "Language.ModuleDSL.Arbitrary"), pretty-print them, then
+-- to parse the resulting text string.  In all cases, the parse result
+-- should be identical to the original arbitrary AST.
+--
+-- Uses the tasty test framework to organise QuickCheck tests.
+--
 module Main where
 
 import Data.Data
@@ -15,8 +23,11 @@ import Language.ModuleDSL.Arbitrary ()
 
 
 main :: IO ()
---main = defaultMain tests
-main = verboseCheckWith (stdArgs { maxSize = 50 }) exprs
+main = defaultMain tests
+-- This alternative main can be used to look at the arbitrary values
+-- generated for expressions: can be useful for debugging to get some
+-- idea of what the test is actually looking at.
+--main = verboseCheckWith (stdArgs { maxSize = 50 }) exprs
 
 tests :: TestTree
 tests = testGroup "Tests"
@@ -46,14 +57,19 @@ string_literals x = isString x ==> roundTrip pLiteral x
 ids :: Name -> Bool
 ids = roundTrip pName
 
+-- | Round-tripping of expressions requires us to normalise the parse
+-- results so that we get things like "-1.0" parsing as a single
+-- negative literal, rather than a unary negation applied to a
+-- positive literal.
 exprs :: Expr -> Bool
 exprs = roundTripWith normalise pExpr
 
--- Pretty-printer/parser round-trip testing property.
-
+-- | Basic pretty-printer/parser round-trip testing property.
 roundTrip :: (Eq a, Pretty a, Arbitrary a, Data a) => Parser a -> a -> Bool
 roundTrip = roundTripWith id
 
+-- | Pretty-printer/parser round-trip testing property with
+-- normalisation.
 roundTripWith :: (Eq a, Pretty a, Arbitrary a, Data a) =>
               (a -> a) -> Parser a -> a -> Bool
 roundTripWith norm p ast = if null errs then norm res == norm ast else False

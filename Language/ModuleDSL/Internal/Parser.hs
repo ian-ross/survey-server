@@ -1,4 +1,18 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes, OverloadedStrings #-}
+-- | Main parser definition for module DSL.
+--
+-- This uses the uu-parsinglib library, which is a little bit
+-- different from Parsec!  It has the same applicative and monadic
+-- interface, but the treatment of ambiguity is a bit different --
+-- there's no 'try', but there is an 'amb' to mark ambiguous choice
+-- and a cost model (using 'micro') to help resolve other ambiguous
+-- parses.
+--
+-- The expression syntax and relative operator precedence is expressed
+-- explicitly here since the number of operators involved is
+-- relatively small (see the functions from 'pExpr' to 'pExprPrim'
+-- below).
+--
 module Language.ModuleDSL.Internal.Parser where
 
 import Prelude

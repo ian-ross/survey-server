@@ -1,5 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
+-- | Arbitrary instances for module DSL AST types for round-trip
+-- QuickCheck testing of parser.  Most of these are pretty
+-- self-explanatory.
+--
+-- Note that these are all orphan instances, to avoid polluting
+-- 'Language.ModuleDSL.Syntax' with them!
+--
 module Language.ModuleDSL.Arbitrary where
 
 import Prelude
@@ -13,8 +20,6 @@ import Test.QuickCheck
 import Language.ModuleDSL.Syntax
 import Language.ModuleDSL.Internal.Utils
 
-
--- Arbitrary instances for all AST types.
 
 instance Arbitrary Module where
   arbitrary = liftM3 Module arbitrary arbitrary arbitrary
@@ -44,6 +49,9 @@ instance Arbitrary Literal where
                     , liftM Bool arbitrary
                     , return Null ]
 
+-- | Generator for string contents that includes Unicode characters
+-- and handles quotation of double quotes as required by the module
+-- DSL parser.
 okstring :: Gen Text
 okstring = (T.pack . dupquotes) <$> sized (\n -> replicateM n okch)
   where okch = frequency [(10, elements [' ', '"']), (10, choose ('0', '9')),
@@ -51,6 +59,8 @@ okstring = (T.pack . dupquotes) <$> sized (\n -> replicateM n okch)
                           (10, choose (' ', '\127') `suchThat` isPrint),
                           (5, choose (' ', '\1024') `suchThat` isPrint)]
 
+-- | Generator for arbitrary IDs: makes period-separated sequences of
+-- names that aren't too long.
 instance Arbitrary Name where
   arbitrary = Name <$> T.intercalate "." . map T.pack . take 3 <$> listOf1 comp
     where comp = (:) <$> inich <*> listOf ch
@@ -66,6 +76,10 @@ instance Arbitrary BinaryOp where
                        , EqOp, NEqOp, GtOp, GEqOp, LtOp, LeqOp
                        , EqCIOp, NEqCIOp, GtCIOp, GEqCIOp, LtCIOp, LeqCIOp ]
 
+-- | Use standard approach for controlling size of arbitrary values of
+-- recursive data structures.  (The divisors of 2 and 4 below are
+-- determined empirically as yielding reasonable sizes of values for
+-- testing.)
 instance Arbitrary Expr where
   arbitrary = sized expr
     where expr n
