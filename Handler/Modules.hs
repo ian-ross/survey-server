@@ -72,6 +72,8 @@ getModuleEditR moduleId = do
 postModuleDeleteR :: ModuleId -> Handler Html
 postModuleDeleteR moduleId = do
   mdl <- runDB $ get404 moduleId
+  runDB $ deleteWhere [ModuleActivationModule ==. moduleId]
+  runDB $ deleteWhere [ModuleDataModule ==. moduleId]
   runDB $ delete moduleId
   setAlert OK $ "Deleted Module: " <> moduleTitle mdl
   redirectUltDest HomeR
