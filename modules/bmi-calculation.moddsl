@@ -1,0 +1,11 @@
+Module bmi {language="EN"}
+
+Function bmi(h, w) = w / (h / 100)^2
+
+SurveyPage bmi {required=true}
+  TextDisplay "Please give your height and weight."
+  height = NumericQuestion "What is your height in cm?"
+           {min=1, max=300}
+  weight = NumericQuestion "What is your weight in kg?"
+           {min = 1, max=300}
+  TextDisplay "Your BMI is " <> bmi(height, weight)

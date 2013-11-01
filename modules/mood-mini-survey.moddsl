@@ -1,0 +1,8 @@
+Module test1 {language="EN"}
+
+SurveyPage basic {required=true}
+  TextDisplay "This is a very basic survey page.  Just answer the questions..."
+  mood = NumericQuestion "On a scale of 0-100, how is your mood today?"
+         {min=0, max=100}
+  change = ChoiceQuestion "Is your mood better or worse than yesterday?"
+           ( "Better" => 1, "Worse" => -1 )

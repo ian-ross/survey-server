@@ -1,0 +1,11 @@
+Module factorial {language="EN"}
+
+Function factorial(n) = if n < 2
+                        then 1
+                        else n * factorial(n - 1)
+
+SurveyPage factorial {required=true}
+  TextDisplay "Give a number!"
+  n = NumericQuestion "What's your number?"
+           {min=1, max=10}
+  TextDisplay "The factorial of " <> n <> " is " <> factorial(n)
